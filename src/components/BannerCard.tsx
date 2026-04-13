@@ -20,16 +20,16 @@ const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
       initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      className="relative group overflow-hidden bg-card-main border border-border-main hover:border-cyber-purple/50 transition-all duration-500 rounded-2xl"
+      className="relative group overflow-hidden bg-card-main border border-border-main hover:border-cyber-purple/50 transition-all duration-500 rounded-2xl h-full"
     >
       {/* Background Glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-cyber-purple/5 rounded-full blur-[100px] -mr-32 -mt-32 group-hover:bg-cyber-purple/10 transition-all" />
       
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row h-full">
         {/* Large Banner Image */}
         <Link 
           to={`/product/${product.slug || product.id}`}
-          className="relative w-full lg:w-3/5 aspect-video overflow-hidden border-b lg:border-b-0 lg:border-r border-border-main rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none"
+          className="relative w-full lg:w-3/5 aspect-video lg:aspect-auto overflow-hidden border-b lg:border-b-0 lg:border-r border-border-main rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none"
         >
           <SafeImage 
             src={product.image_url} 
@@ -57,8 +57,8 @@ const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
         </Link>
 
         {/* Content Details */}
-        <div className="w-full lg:w-2/5 p-8 flex flex-col justify-center space-y-6">
-          <div className="space-y-2">
+        <div className="w-full lg:w-2/5 p-6 md:p-8 flex flex-col justify-between space-y-4 min-h-[320px] lg:min-h-0">
+          <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-mono text-cyber-purple uppercase tracking-widest">
               <div className="flex items-center gap-2">
                 <Zap className="w-3 h-3" />
@@ -74,47 +74,47 @@ const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
               </Link>
             </div>
             <Link to={`/product/${product.slug || product.id}`}>
-              <h3 className="text-3xl md:text-4xl font-black tracking-tighter uppercase leading-none text-text-main group-hover:text-cyber-purple transition-colors">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter uppercase leading-tight text-text-main group-hover:text-cyber-purple transition-colors line-clamp-2">
                 {product.title}
               </h3>
             </Link>
-          </div>
-
-          <Link to={`/product/${product.slug || product.id}`} className="block">
-            <p className="text-sm text-text-muted font-mono leading-relaxed line-clamp-3 uppercase tracking-wide hover:text-text-main transition-colors">
-              {product.description}
-            </p>
-          </Link>
-
-          <div className="flex flex-wrap gap-4 items-center pt-4">
-            <div className="px-4 py-2 bg-card-main border border-border-main rounded-xl">
-              <span className="block text-[9px] font-mono text-text-muted opacity-50 uppercase">Asset_Value</span>
-              <span className="text-xl font-mono font-bold text-text-main">{convertPrice(product.price)}</span>
-            </div>
             
-            <div className="flex-grow" />
-
-            <Link 
-              to={`/product/${product.slug || product.id}`}
-              className="cyber-button px-8 py-3 flex items-center gap-3 group/btn"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span className="font-bold uppercase tracking-widest">
-                {order?.status === 'approved' ? 'ACCESS_DATA' : 'INITIALIZE_PURCHASE'}
-              </span>
-              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+            <Link to={`/product/${product.slug || product.id}`} className="block">
+              <p className="text-xs md:text-sm text-text-muted font-mono leading-relaxed line-clamp-3 uppercase tracking-wide hover:text-text-main transition-colors min-h-[3em]">
+                {product.description}
+              </p>
             </Link>
           </div>
 
-          {/* Trust Indicators */}
-          <div className="pt-6 flex items-center gap-6 border-t border-border-main">
-            <div className="flex items-center gap-2 text-[9px] font-mono text-text-muted uppercase">
-              <Shield className="w-3 h-3 text-green-500" />
-              Verified_Source
+          <div className="space-y-6">
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="px-4 py-2 bg-card-main border border-border-main rounded-xl">
+                <span className="block text-[9px] font-mono text-text-muted opacity-50 uppercase">Asset_Value</span>
+                <span className="text-lg font-mono font-bold text-text-main">{convertPrice(product.price)}</span>
+              </div>
+              
+              <Link 
+                to={`/product/${product.slug || product.id}`}
+                className="cyber-button px-6 py-2.5 flex items-center gap-2 group/btn text-xs"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span className="font-bold uppercase tracking-widest">
+                  {order?.status === 'approved' ? 'ACCESS' : 'INITIALIZE'}
+                </span>
+                <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform" />
+              </Link>
             </div>
-            <div className="flex items-center gap-2 text-[9px] font-mono text-text-muted uppercase">
-              <Zap className="w-3 h-3 text-yellow-500" />
-              Instant_Access
+
+            {/* Trust Indicators */}
+            <div className="pt-4 flex items-center gap-4 border-t border-border-main">
+              <div className="flex items-center gap-2 text-[8px] font-mono text-text-muted uppercase">
+                <Shield className="w-3 h-3 text-green-500" />
+                Verified
+              </div>
+              <div className="flex items-center gap-2 text-[8px] font-mono text-text-muted uppercase">
+                <Zap className="w-3 h-3 text-yellow-500" />
+                Instant
+              </div>
             </div>
           </div>
         </div>

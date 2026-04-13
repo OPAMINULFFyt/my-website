@@ -6,6 +6,12 @@ export interface Profile {
   full_name: string;
   phone: string;
   address: string;
+  bio?: string;
+  avatar_url?: string;
+  facebook_url?: string;
+  youtube_url?: string;
+  telegram_url?: string;
+  whatsapp_number?: string;
   role: 'user' | 'admin' | 'developer' | 'owner';
   points: number;
   is_banned?: boolean;
@@ -22,7 +28,17 @@ export interface Review {
   profiles?: {
     full_name: string;
     role: 'user' | 'admin' | 'developer' | 'owner';
+    avatar_url?: string;
   };
+}
+
+export interface CourseLesson {
+  id: string;
+  title: string;
+  url: string;
+  duration?: string;
+  description?: string;
+  image_url?: string;
 }
 
 export interface Product {
@@ -42,9 +58,11 @@ export interface Product {
   demo_url?: string;
   publisher_id?: string;
   publisher_name?: string;
+  course_content?: CourseLesson[];
   profiles?: {
     full_name: string;
     role: 'user' | 'admin' | 'developer' | 'owner';
+    avatar_url?: string;
   };
   metadata?: Record<string, any>;
   created_at: string;

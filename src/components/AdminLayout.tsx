@@ -54,14 +54,24 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         <div className="cyber-card p-4 h-full">
           <div className="flex items-center justify-between mb-8 px-2">
             <div className="flex items-center gap-3">
-              {profile?.role === 'owner' ? (
-                <Crown className="w-6 h-6 text-yellow-500 animate-pulse" />
-              ) : (
-                <Shield className="w-6 h-6 text-cyber-purple" />
-              )}
-              <h2 className="font-bold text-sm tracking-widest uppercase">
-                {profile?.role === 'owner' ? 'OWNER_CONSOLE' : 'ADMIN_PANEL'}
-              </h2>
+              <div className="w-10 h-10 rounded-lg bg-card-main border border-border-main overflow-hidden flex items-center justify-center relative group">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : profile?.role === 'owner' ? (
+                  <Crown className="w-6 h-6 text-yellow-500" />
+                ) : (
+                  <Shield className="w-6 h-6 text-cyber-purple" />
+                )}
+                <div className="absolute inset-0 border border-cyber-purple opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <div>
+                <h2 className="font-bold text-[10px] tracking-widest uppercase text-text-main">
+                  {profile?.role === 'owner' ? 'OWNER_CONSOLE' : 'ADMIN_PANEL'}
+                </h2>
+                <p className="text-[8px] font-mono text-text-muted uppercase truncate max-w-[120px]">
+                  {profile?.full_name || 'OPERATIVE'}
+                </p>
+              </div>
             </div>
           </div>
           

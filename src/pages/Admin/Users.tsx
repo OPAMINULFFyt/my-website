@@ -14,6 +14,7 @@ interface Profile {
   role: 'user' | 'admin' | 'developer' | 'owner';
   points: number;
   is_banned: boolean;
+  avatar_url?: string;
   updated_at: string;
 }
 
@@ -147,8 +148,10 @@ const AdminUsers: React.FC = () => {
             <div key={profile.id} className="cyber-card group hover:border-cyber-purple/50 transition-all">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center shrink-0">
-                    {profile.role === 'owner' ? (
+                  <div className="w-12 h-12 bg-card-main border border-border-main overflow-hidden flex items-center justify-center shrink-0">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    ) : profile.role === 'owner' ? (
                       <Crown className="w-6 h-6 text-yellow-500" />
                     ) : profile.role === 'admin' ? (
                       <ShieldCheck className="w-6 h-6 text-cyber-purple" />

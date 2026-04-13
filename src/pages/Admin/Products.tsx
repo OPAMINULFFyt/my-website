@@ -58,8 +58,14 @@ const AdminProducts: React.FC = () => {
     
     if (!id) return; // Should only be editing here
 
+    let contentUrl = productData.content_url;
+    if (productData.category === 'course' && productData.course_content && productData.course_content.length > 0) {
+      contentUrl = productData.course_content[0].url;
+    }
+
     const { error } = await supabase.from('products').update({
       ...productData,
+      content_url: contentUrl,
       publisher_id: user?.id
     }).eq('id', id);
 
@@ -345,6 +351,93 @@ const AdminProducts: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {currentProduct.category === 'course' && (
+                <div className="space-y-4 border-t border-border-main pt-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-mono text-cyber-purple uppercase font-bold tracking-widest">Course_Curriculum</h3>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setCurrentProduct({
+                          ...currentProduct,
+                          course_content: [
+                            ...(currentProduct.course_content || []),
+                            { id: Math.random().toString(36).substring(2, 11), title: '', url: '', duration: '', description: '' }
+                          ]
+                        });
+                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-cyber-purple/10 border border-cyber-purple/30 text-cyber-purple text-[10px] font-bold uppercase tracking-widest hover:bg-cyber-purple/20 transition-all rounded-lg"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add_Lesson
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(currentProduct.course_content || []).map((lesson: any, index: number) => (
+                      <div key={lesson.id} className="p-4 bg-white/5 border border-border-main rounded-xl space-y-4 relative group">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newContent = [...(currentProduct.course_content || [])];
+                            newContent.splice(index, 1);
+                            setCurrentProduct({ ...currentProduct, course_content: newContent });
+                          }}
+                          className="absolute top-2 right-2 p-1.5 text-red-500/50 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Lesson Title</label>
+                            <input 
+                              type="text" required
+                              className="cyber-input h-9 text-xs"
+                              value={lesson.title}
+                              onChange={(e) => {
+                                const newContent = [...(currentProduct.course_content || [])];
+                                newContent[index].title = e.target.value;
+                                setCurrentProduct({ ...currentProduct, course_content: newContent });
+                              }}
+                              placeholder="e.g. 01. Introduction"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Video URL</label>
+                            <input 
+                              type="text" required
+                              className="cyber-input h-9 text-xs"
+                              value={lesson.url}
+                              onChange={(e) => {
+                                const newContent = [...(currentProduct.course_content || [])];
+                                newContent[index].url = e.target.value;
+                                setCurrentProduct({ ...currentProduct, course_content: newContent });
+                              }}
+                              placeholder="YouTube/Drive/Direct link..."
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Lesson Thumbnail URL (Optional)</label>
+                            <input 
+                              type="text"
+                              className="cyber-input h-9 text-xs"
+                              value={lesson.image_url}
+                              onChange={(e) => {
+                                const newContent = [...(currentProduct.course_content || [])];
+                                newContent[index].image_url = e.target.value;
+                                setCurrentProduct({ ...currentProduct, course_content: newContent });
+                              }}
+                              placeholder="https://example.com/lesson-thumb.jpg"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-mono text-text-muted opacity-50 uppercase mb-1">Description</label>

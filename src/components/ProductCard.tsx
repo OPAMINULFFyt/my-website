@@ -15,9 +15,12 @@ import { useLocalization } from '../context/LocalizationContext';
 interface ProductCardProps {
   product: Product;
   order?: Order;
+  progress?: {
+    completed_lessons: string[];
+  };
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, order }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, order, progress }) => {
   const { user, profile } = useAuth();
   const { convertPrice } = useLocalization();
   const [isBuying, setIsBuying] = useState(false);
@@ -88,6 +91,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order }) => {
     setSubmitting(false);
   };
 
+  const isApproved = order?.status === 'approved';
+  const isPending = order?.status === 'pending';
+
+  const progressPercentage = product.category === 'course' && product.course_content?.length && progress
+    ? Math.round((progress.completed_lessons.length / product.course_content.length) * 100)
+    : 0;
+
   const getStatusIcon = () => {
     if (!order) return null;
     switch (order.status) {
@@ -154,21 +164,27 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order }) => {
         </motion.div>
       </Link>
 
-      <div className="px-4 pb-4 flex flex-col flex-grow">
+      <div className="px-3 pb-3 md:px-4 md:pb-4 flex flex-col flex-grow">
         <div className="flex justify-between items-start mb-1">
           <div className="flex flex-col">
             <Link to={`/product/${product.slug || product.id}`}>
-              <h3 className="text-sm md:text-lg font-bold tracking-tight text-text-main group-hover:text-cyber-purple transition-colors line-clamp-1 uppercase">
+              <h3 className="text-[11px] md:text-lg font-bold tracking-tight text-text-main group-hover:text-cyber-purple transition-colors line-clamp-2 uppercase leading-tight">
                 {product.title}
               </h3>
             </Link>
             {/* Publisher Badge */}
             <Link 
               to={product.publisher_id ? `/user/${product.publisher_id}` : '#'} 
-              className="flex items-center gap-1.5 mt-0.5 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 mt-1 hover:opacity-80 transition-opacity group/pub-link"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-cyber-purple animate-pulse" />
+              <div className="w-5 h-5 bg-bg-main border border-border-main overflow-hidden flex items-center justify-center shrink-0 group-hover/pub-link:border-cyber-purple transition-colors">
+                {(product.profiles as any)?.avatar_url ? (
+                  <img src={(product.profiles as any).avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-1.5 h-1.5 rounded-full bg-cyber-purple animate-pulse" />
+                )}
+              </div>
               <span className="text-[8px] md:text-[9px] font-mono text-text-muted uppercase tracking-wider">
                 Pub: <span className="text-cyber-purple/80">{product.profiles?.full_name || 'OP_AMINUL_FF'}</span>
               </span>
@@ -177,23 +193,47 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order }) => {
           {getStatusIcon()}
         </div>
 
-        <p className="text-[10px] md:text-xs text-text-muted mb-3 md:mb-6 line-clamp-2 h-6 md:h-8 font-mono leading-relaxed">
+        <p className="text-[10px] md:text-xs text-text-muted mb-3 md:mb-6 line-clamp-2 min-h-[3.3em] font-mono leading-relaxed">
           {product.description}
         </p>
         
-        <div className="mt-auto pt-2 md:pt-4 border-t border-border-main flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-[8px] md:text-[9px] font-mono text-text-muted opacity-50 uppercase">Value</span>
-            <span className="text-xs md:text-sm font-mono font-bold text-cyber-purple">{convertPrice(product.price)}</span>
+        <div className="mt-auto pt-2 md:pt-4 border-t border-border-main flex items-center justify-between gap-2">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[7px] md:text-[9px] font-mono text-text-muted opacity-50 uppercase truncate">Value</span>
+            <span className="text-[10px] md:text-sm font-mono font-bold text-cyber-purple truncate">{convertPrice(product.price)}</span>
           </div>
+
+          {product.category === 'course' && progressPercentage > 0 && (
+            <div className="flex flex-col items-end min-w-0">
+              <span className="text-[7px] md:text-[9px] font-mono text-text-muted opacity-50 uppercase truncate">Progress</span>
+              <div className="flex items-center gap-2">
+                <div className="w-12 md:w-16 h-1 bg-white/5 border border-border-main rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-cyber-purple shadow-[0_0_8px_rgba(188,19,254,0.5)]" 
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+                <span className="text-[8px] md:text-[10px] font-mono text-cyber-purple font-bold">{progressPercentage}%</span>
+              </div>
+            </div>
+          )}
 
           <Link 
             to={`/product/${product.slug || product.id}`}
-            className="relative overflow-hidden px-2 md:px-4 py-1.5 md:py-2 bg-card-main border border-border-main text-[9px] md:text-[10px] font-bold uppercase tracking-widest hover:bg-cyber-purple hover:border-cyber-purple hover:text-white transition-all duration-300 group/btn rounded-lg"
+            className="relative overflow-hidden px-2 md:px-4 py-1.5 md:py-2 bg-card-main border border-border-main text-[8px] md:text-[10px] font-bold uppercase tracking-widest hover:bg-cyber-purple hover:border-cyber-purple hover:text-white transition-all duration-300 group/btn rounded-lg shrink-0"
           >
             <span className="relative z-10 flex items-center gap-2">
-              <ShoppingCart className="w-3 h-3" />
-              {order?.status === 'approved' ? 'Access' : 'Initialize'}
+              {isApproved ? (
+                <>
+                  <CheckCircle className="w-3 h-3" />
+                  {product.category === 'course' ? (progressPercentage > 0 ? 'Continue' : 'Start') : 'Access'}
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-3 h-3" />
+                  {isPending ? 'Verifying' : 'Initialize'}
+                </>
+              )}
             </span>
             <div className="absolute inset-0 bg-cyber-purple/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
           </Link>

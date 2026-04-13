@@ -64,8 +64,8 @@ export const AnnouncementsMarquee: React.FC = () => {
               exit={{ y: -20, opacity: 0 }}
               className={`absolute inset-0 flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest ${getTypeStyles(current.type)}`}
             >
-              <span className="font-bold">[{current.title}]</span>
-              <span className="opacity-80">{current.content}</span>
+              <span className="font-bold whitespace-nowrap">[{current.title}]</span>
+              <span className="opacity-80 truncate">{current.content}</span>
             </motion.div>
           </AnimatePresence>
         </div>

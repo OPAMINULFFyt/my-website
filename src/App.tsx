@@ -22,6 +22,8 @@ import AddHardware from './pages/Admin/AddHardware';
 import AdminLogs from './pages/Admin/Logs';
 import AdminAnnouncements from './pages/Admin/Announcements';
 import ProductDetails from './pages/ProductDetails';
+import Learning from './pages/Learning';
+import Checkout from './pages/Checkout';
 import AuthPage from './pages/Auth';
 import Leaderboard from './pages/Leaderboard';
 import UserProfile from './pages/UserProfile';
@@ -143,6 +145,16 @@ const AppContent: React.FC = () => {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/user/:id" element={<UserProfile />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/checkout/:id" element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          } />
+          <Route path="/learning/:id" element={
+            <ProtectedRoute>
+              <Learning />
+            </ProtectedRoute>
+          } />
           <Route path="/profile" element={
             <ProtectedRoute>
               <ProfilePage />

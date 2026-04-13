@@ -266,7 +266,13 @@ const AdminOrders: React.FC = () => {
                 <div className="flex-1 space-y-3 border-l border-border-main pl-0 lg:pl-8">
                   <h5 className="text-[10px] font-mono text-text-muted opacity-50 uppercase mb-2">Customer Identity</h5>
                   <div className="flex items-center gap-3 text-sm text-text-main">
-                    <User className="w-4 h-4 text-cyber-purple" />
+                    <div className="w-8 h-8 bg-card-main border border-border-main overflow-hidden flex items-center justify-center">
+                      {order.profiles?.avatar_url ? (
+                        <img src={order.profiles.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <User className="w-4 h-4 text-cyber-purple" />
+                      )}
+                    </div>
                     <span>{order.profiles?.full_name || 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-text-main">

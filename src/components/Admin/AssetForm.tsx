@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Category } from '../../types';
-import { Save, ArrowLeft, Loader2, Link as LinkIcon } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, Link as LinkIcon, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { slugify } from '../../lib/utils';
 
@@ -26,6 +26,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
     requirements: '',
     features: '',
     demo_url: '',
+    course_content: [] as any[],
     metadata: (category === 'course' ? {
       duration: '',
       level: 'Beginner',
@@ -47,8 +48,14 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
 
     const { data: { user } } = await supabase.auth.getUser();
     
+    let contentUrl = formData.content_url;
+    if (formData.category === 'course' && formData.course_content.length > 0) {
+      contentUrl = formData.course_content[0].url;
+    }
+
     const submissionData = {
       ...formData,
+      content_url: contentUrl,
       publisher_id: user?.id,
       features: formData.features.split(',').map(f => f.trim()).filter(f => f !== '')
     };
@@ -138,18 +145,20 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                   onChange={(e) => setFormData({...formData, image_url: e.target.value})}
                 />
               </div>
-              <div>
-                <label className="block text-xs font-mono text-white/50 uppercase mb-1">
-                  {category === 'course' ? 'Video URL / Playlist Link' : 'Download Link'}
-                </label>
-                <input 
-                  type="text" required
-                  className="cyber-input"
-                  value={formData.content_url}
-                  onChange={(e) => setFormData({...formData, content_url: e.target.value})}
-                  placeholder="Enter URL..."
-                />
-              </div>
+              {category !== 'course' && (
+                <div>
+                  <label className="block text-xs font-mono text-white/50 uppercase mb-1">
+                    {category === 'file' ? 'Download Link' : 'Register Link'}
+                  </label>
+                  <input 
+                    type="text" required
+                    className="cyber-input"
+                    value={formData.content_url}
+                    onChange={(e) => setFormData({...formData, content_url: e.target.value})}
+                    placeholder="Enter URL..."
+                  />
+                </div>
+              )}
               {(category === 'file' || category === 'hardware') && (
                 <div>
                   <label className="block text-xs font-mono text-white/50 uppercase mb-1">
@@ -167,6 +176,129 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
               )}
             </div>
           </div>
+
+          {category === 'course' && (
+            <div className="space-y-4 border-t border-border-main pt-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-mono text-cyber-purple uppercase font-bold tracking-widest">Course_Curriculum</h3>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setFormData({
+                      ...formData,
+                      course_content: [
+                        ...formData.course_content,
+                        { id: Math.random().toString(36).substring(2, 11), title: '', url: '', duration: '', description: '' }
+                      ]
+                    });
+                  }}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-cyber-purple/10 border border-cyber-purple/30 text-cyber-purple text-[10px] font-bold uppercase tracking-widest hover:bg-cyber-purple/20 transition-all rounded-lg"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add_Lesson
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {formData.course_content.map((lesson, index) => (
+                  <div key={lesson.id} className="p-4 bg-white/5 border border-border-main rounded-xl space-y-4 relative group">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const newContent = [...formData.course_content];
+                        newContent.splice(index, 1);
+                        setFormData({ ...formData, course_content: newContent });
+                      }}
+                      className="absolute top-2 right-2 p-1.5 text-red-500/50 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Lesson Title</label>
+                        <input 
+                          type="text" required
+                          className="cyber-input h-9 text-xs"
+                          value={lesson.title}
+                          onChange={(e) => {
+                            const newContent = [...formData.course_content];
+                            newContent[index].title = e.target.value;
+                            setFormData({ ...formData, course_content: newContent });
+                          }}
+                          placeholder="e.g. 01. Introduction"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Video URL</label>
+                        <input 
+                          type="text" required
+                          className="cyber-input h-9 text-xs"
+                          value={lesson.url}
+                          onChange={(e) => {
+                            const newContent = [...formData.course_content];
+                            newContent[index].url = e.target.value;
+                            setFormData({ ...formData, course_content: newContent });
+                          }}
+                          placeholder="YouTube/Drive/Direct link..."
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Lesson Thumbnail URL (Optional)</label>
+                        <input 
+                          type="text"
+                          className="cyber-input h-9 text-xs"
+                          value={lesson.image_url}
+                          onChange={(e) => {
+                            const newContent = [...formData.course_content];
+                            newContent[index].image_url = e.target.value;
+                            setFormData({ ...formData, course_content: newContent });
+                          }}
+                          placeholder="https://example.com/lesson-thumb.jpg"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Duration</label>
+                        <input 
+                          type="text"
+                          className="cyber-input h-9 text-xs"
+                          value={lesson.duration}
+                          onChange={(e) => {
+                            const newContent = [...formData.course_content];
+                            newContent[index].duration = e.target.value;
+                            setFormData({ ...formData, course_content: newContent });
+                          }}
+                          placeholder="e.g. 15:00"
+                        />
+                      </div>
+                      <div className="md:col-span-3">
+                        <label className="block text-[10px] font-mono text-white/30 uppercase mb-1">Short Description</label>
+                        <input 
+                          type="text"
+                          className="cyber-input h-9 text-xs"
+                          value={lesson.description}
+                          onChange={(e) => {
+                            const newContent = [...formData.course_content];
+                            newContent[index].description = e.target.value;
+                            setFormData({ ...formData, course_content: newContent });
+                          }}
+                          placeholder="What will users learn in this part?"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {formData.course_content.length === 0 && (
+                  <div className="text-center py-8 border border-dashed border-border-main rounded-xl">
+                    <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest opacity-40 italic">No lessons added yet. Click "Add Lesson" to start building your curriculum.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-mono text-white/50 uppercase mb-1">Description</label>

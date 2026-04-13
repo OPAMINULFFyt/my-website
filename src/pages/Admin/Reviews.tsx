@@ -66,7 +66,13 @@ const AdminReviews: React.FC = () => {
                     </div>
                     <div className="h-4 w-px bg-border-main" />
                     <div className="flex items-center gap-2 text-[10px] font-mono text-text-muted opacity-40 uppercase">
-                      <User className="w-3 h-3" />
+                      <div className="w-4 h-4 bg-card-main border border-border-main overflow-hidden flex items-center justify-center">
+                        {review.profiles?.avatar_url ? (
+                          <img src={review.profiles.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        ) : (
+                          <User className="w-2.5 h-2.5" />
+                        )}
+                      </div>
                       {review.profiles?.full_name}
                     </div>
                     <div className="flex items-center gap-2 text-[10px] font-mono text-text-muted opacity-40 uppercase">

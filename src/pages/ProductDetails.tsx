@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Product, Order } from '../types';
 import { useAuth } from '../App';
 import { formatPrice } from '../lib/utils';
-import { ShoppingCart, ExternalLink, Clock, CheckCircle, XCircle, ArrowLeft, Shield, Zap, Cpu, BookOpen, FileCode, Star, MessageSquare, Send, Loader2, User, Play } from 'lucide-react';
+import { ShoppingCart, ExternalLink, Clock, CheckCircle, XCircle, ArrowLeft, Shield, Zap, Cpu, BookOpen, FileCode, Star, MessageSquare, Send, Loader2, User, Play, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import Badge from '../components/Badge';
@@ -34,6 +34,7 @@ const ProductDetails: React.FC = () => {
   const [userRating, setUserRating] = useState(5);
   const [userComment, setUserComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
 
   const [paymentSettings, setPaymentSettings] = useState({
     bkash: '01XXXXXXXXX',
@@ -73,7 +74,7 @@ const ProductDetails: React.FC = () => {
     
     let productQuery = supabase
       .from('products')
-      .select('*, profiles:publisher_id(full_name, role)');
+      .select('*, profiles:publisher_id(full_name, role, avatar_url)');
     
     if (isUUID) {
       productQuery = productQuery.eq('id', id);
@@ -95,6 +96,19 @@ const ProductDetails: React.FC = () => {
           .eq('product_id', productData.id)
           .maybeSingle();
         if (orderData) setOrder(orderData);
+
+        // Fetch progress
+        const { data: progressData } = await supabase
+          .from('user_progress')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('product_id', productData.id)
+          .maybeSingle();
+        
+        if (progressData && productData.course_content?.length) {
+          const percentage = Math.round((progressData.completed_lessons?.length / productData.course_content.length) * 100);
+          setProgress(percentage);
+        }
       }
 
       // Fetch reviews
@@ -115,7 +129,7 @@ const ProductDetails: React.FC = () => {
 
         const { data: reviewData, error: reviewError } = await supabase
           .from('reviews')
-          .select('*, profiles:user_id(full_name, role, points)')
+          .select('*, profiles:user_id(full_name, role, points, avatar_url)')
           .eq('product_id', productData.id)
           .order('created_at', { ascending: false });
         
@@ -131,7 +145,7 @@ const ProductDetails: React.FC = () => {
             const userIds = simpleReviews.map(r => r.user_id);
             const { data: profileData } = await supabase
               .from('profiles')
-              .select('id, full_name, role, points')
+              .select('id, full_name, role, points, avatar_url')
               .in('id', userIds);
             
             const profileMap = (profileData || []).reduce((acc, p) => ({ ...acc, [p.id]: p }), {} as any);
@@ -244,7 +258,7 @@ const ProductDetails: React.FC = () => {
 
         const { data: newReviews, error: refreshError } = await supabase
           .from('reviews')
-          .select('*, profiles:user_id(full_name, role, points)')
+          .select('*, profiles:user_id(full_name, role, points, avatar_url)')
           .eq('product_id', product.id)
           .order('created_at', { ascending: false });
         
@@ -259,7 +273,7 @@ const ProductDetails: React.FC = () => {
             const userIds = simpleNewReviews.map(r => r.user_id);
             const { data: profileData } = await supabase
               .from('profiles')
-              .select('id, full_name, role, points')
+              .select('id, full_name, role, points, avatar_url')
               .in('id', userIds);
             
             const profileMap = (profileData || []).reduce((acc, p) => ({ ...acc, [p.id]: p }), {} as any);
@@ -308,8 +322,8 @@ const ProductDetails: React.FC = () => {
           className="cyber-card p-2"
         >
           <div className="relative aspect-video overflow-hidden bg-cyber-black">
-            {product.category === 'course' && order?.status === 'approved' && product.content_url ? (
-              <VideoPlayer url={product.content_url} title={product.title} />
+            {product.category === 'course' && order?.status === 'approved' && product.course_content?.length === 1 ? (
+              <VideoPlayer url={product.course_content[0].url} title={product.title} />
             ) : (
               <>
                 <SafeImage 
@@ -321,7 +335,7 @@ const ProductDetails: React.FC = () => {
                   <CategoryIcon className="w-4 h-4" />
                   {product.category}
                 </div>
-                {product.category === 'course' && (
+                {product.category === 'course' && product.course_content?.length === 1 && (
                   <button 
                     onClick={() => setIsBuying(true)}
                     className="absolute inset-0 flex items-center justify-center bg-cyber-black/40 backdrop-blur-[2px] group/play transition-all hover:bg-cyber-black/30"
@@ -349,7 +363,13 @@ const ProductDetails: React.FC = () => {
                 to={product.publisher_id ? `/user/${product.publisher_id}` : '#'}
                 className="flex items-center gap-2 px-2 py-1 bg-card-main border border-border-main hover:border-cyber-purple transition-colors group/pub"
               >
-                <User className="w-3 h-3 text-text-muted group-hover/pub:text-cyber-purple transition-colors" />
+                <div className="w-5 h-5 bg-bg-main border border-border-main overflow-hidden flex items-center justify-center group-hover/pub:border-cyber-purple transition-colors">
+                  {(product.profiles as any)?.avatar_url ? (
+                    <img src={(product.profiles as any).avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <User className="w-3 h-3 text-text-muted group-hover/pub:text-cyber-purple transition-colors" />
+                  )}
+                </div>
                 <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest">
                   Publisher: <span className="text-text-main font-bold group-hover/pub:text-cyber-purple transition-colors">{product.profiles?.full_name || 'SYSTEM'}</span>
                 </span>
@@ -359,8 +379,22 @@ const ProductDetails: React.FC = () => {
             <div className="h-1 w-20 bg-cyber-purple" />
           </div>
 
-          <div className="text-3xl font-mono font-bold text-cyber-purple">
+          <div className="text-3xl font-mono font-bold text-cyber-purple flex items-center justify-between">
             {convertPrice(product.price)}
+            {progress !== null && (
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-[10px] font-mono text-text-muted uppercase">Your_Progress</p>
+                  <p className="text-xs font-bold text-cyber-purple">{progress}%</p>
+                </div>
+                <div className="w-24 h-1.5 bg-white/5 border border-border-main rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-cyber-purple shadow-[0_0_10px_rgba(188,19,254,0.5)]"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <motion.div 
@@ -461,6 +495,43 @@ const ProductDetails: React.FC = () => {
             </div>
           )}
 
+          {product.category === 'course' && product.course_content && product.course_content.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-mono text-cyber-purple uppercase font-bold tracking-widest flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Course_Curriculum
+                </h3>
+                <span className="text-[10px] font-mono text-text-muted uppercase">{product.course_content.length} Lessons</span>
+              </div>
+              <div className="space-y-2">
+                {product.course_content.map((lesson, i) => (
+                  <div key={lesson.id} className="flex items-center justify-between p-3 bg-white/5 border border-border-main rounded-lg group hover:border-cyber-purple/30 transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-cyber-purple/10 border border-cyber-purple/20 flex items-center justify-center text-[10px] font-mono text-cyber-purple">
+                        {String(i + 1).padStart(2, '0')}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-text-main group-hover:text-cyber-purple transition-colors">{lesson.title}</p>
+                        {lesson.duration && <p className="text-[9px] font-mono text-text-muted uppercase">{lesson.duration}</p>}
+                      </div>
+                    </div>
+                    {order?.status === 'approved' ? (
+                      <Link 
+                        to={`/learning/${product.id}?lesson=${lesson.id}`}
+                        className="p-2 text-cyber-purple hover:bg-cyber-purple/10 rounded-lg transition-all"
+                      >
+                        <Play className="w-4 h-4" />
+                      </Link>
+                    ) : (
+                      <Lock className="w-4 h-4 text-text-muted opacity-30" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="pt-6">
             {order?.status === 'approved' ? (
               <div className="space-y-4">
@@ -471,15 +542,25 @@ const ProductDetails: React.FC = () => {
                     <p className="text-xs opacity-80">Your payment has been verified.</p>
                   </div>
                 </div>
-                <a 
-                  href={product.content_url} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="cyber-button w-full flex items-center justify-center gap-3 py-4 text-lg"
-                >
-                  <ExternalLink className="w-6 h-6" />
-                  DOWNLOAD / ACCESS CONTENT
-                </a>
+                {product.category === 'course' ? (
+                  <Link 
+                    to={`/learning/${product.id}`}
+                    className="cyber-button w-full flex items-center justify-center gap-3 py-4 text-lg"
+                  >
+                    <Play className="w-6 h-6" />
+                    START_LEARNING_PROTOCOL
+                  </Link>
+                ) : (
+                  <a 
+                    href={product.content_url} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="cyber-button w-full flex items-center justify-center gap-3 py-4 text-lg"
+                  >
+                    <ExternalLink className="w-6 h-6" />
+                    DOWNLOAD / ACCESS CONTENT
+                  </a>
+                )}
               </div>
             ) : order?.status === 'pending' ? (
               <div className="p-6 border border-yellow-500/30 bg-yellow-500/5 text-yellow-500 flex flex-col items-center gap-4 text-center">
@@ -491,13 +572,13 @@ const ProductDetails: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <button 
-                onClick={() => setIsBuying(true)}
+              <Link 
+                to={`/checkout/${product.id}`}
                 className="cyber-button w-full flex items-center justify-center gap-3 py-4 text-lg"
               >
                 <ShoppingCart className="w-6 h-6" />
                 INITIALIZE PURCHASE
-              </button>
+              </Link>
             )}
           </div>
         </motion.div>
@@ -697,8 +778,12 @@ const ProductDetails: React.FC = () => {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
-                      <Link to={`/user/${review.user_id}`} className="w-8 h-8 bg-card-main border border-border-main flex items-center justify-center hover:border-cyber-purple transition-colors">
-                        <User className="w-4 h-4 text-text-muted opacity-50" />
+                      <Link to={`/user/${review.user_id}`} className="w-10 h-10 bg-card-main border border-border-main overflow-hidden flex items-center justify-center hover:border-cyber-purple transition-colors">
+                        {review.profiles?.avatar_url ? (
+                          <img src={review.profiles.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        ) : (
+                          <User className="w-5 h-5 text-text-muted opacity-50" />
+                        )}
                       </Link>
                       <div>
                         <div className="flex items-center gap-2">

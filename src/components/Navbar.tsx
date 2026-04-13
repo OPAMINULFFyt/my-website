@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../App';
 import { supabase } from '../lib/supabase';
-import { LogIn, LogOut, User, Shield, MoreVertical, X, ShoppingBag, Zap, BookOpen, FileCode, Cpu, Trophy, Sun, Moon, Monitor } from 'lucide-react';
+import { LogIn, LogOut, User, Shield, MoreVertical, X, ShoppingBag, Zap, BookOpen, FileCode, Cpu, Trophy, Sun, Moon, Monitor, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import Badge from './Badge';
@@ -14,10 +14,22 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [siteSettings, setSiteSettings] = useState({
     name: 'OP AMINUL FF',
     logo: ''
   });
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      searchParams.set('search', searchQuery.trim());
+    } else {
+      searchParams.delete('search');
+    }
+    setSearchParams(searchParams);
+    navigate('/' + (searchQuery.trim() ? `?search=${searchQuery.trim()}` : ''));
+  };
 
   React.useEffect(() => {
     const fetchSiteSettings = async () => {
@@ -82,6 +94,23 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
 
+        {/* Search Bar */}
+        <div className="hidden lg:flex flex-1 max-w-md mx-8">
+          <form onSubmit={handleSearch} className="w-full relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-cyber-purple transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search assets, courses, hardware..."
+              className="w-full bg-bg-main border border-border-main rounded-lg py-2 pl-10 pr-4 text-xs font-mono focus:outline-none focus:border-cyber-purple focus:ring-1 focus:ring-cyber-purple/30 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-30 group-focus-within:opacity-100 transition-opacity">
+              <span className="text-[10px] font-mono border border-border-main px-1 rounded">ENTER</span>
+            </div>
+          </form>
+        </div>
+
         <div className="flex items-center gap-4 md:gap-6">
           <div className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-sm font-medium text-text-main hover:text-cyber-purple transition-colors uppercase tracking-widest relative group/link">
@@ -122,10 +151,18 @@ const Navbar: React.FC = () => {
             
             {user ? (
               <div className="flex items-center gap-4">
-                <Link to="/profile" className="flex items-center gap-2 text-sm text-text-main hover:text-cyber-purple transition-colors">
-                  <User className="w-4 h-4" />
-                  <span>{profile?.full_name || 'Complete Profile'}</span>
-                  {profile && <Badge role={profile.role} showIcon={false} className="scale-75 origin-left" />}
+                <Link to="/profile" className="flex items-center gap-2 text-sm text-text-main hover:text-cyber-purple transition-colors group/nav-user">
+                  <div className="w-8 h-8 rounded-lg bg-card-main border border-border-main overflow-hidden flex items-center justify-center group-hover/nav-user:border-cyber-purple transition-colors">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <User className="w-4 h-4" />
+                    )}
+                  </div>
+                  <div className="hidden sm:block">
+                    <p className="font-bold leading-none mb-1">{profile?.full_name || 'Operative'}</p>
+                    {profile && <Badge role={profile.role} showIcon={false} className="scale-75 origin-left" />}
+                  </div>
                 </Link>
                 <button 
                   onClick={() => { signOut(); navigate('/'); }}
@@ -231,9 +268,15 @@ const Navbar: React.FC = () => {
                     <Link 
                       to="/profile" 
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest text-text-muted hover:bg-card-main rounded-lg"
+                      className="flex items-center gap-3 p-3 text-xs font-bold uppercase tracking-widest text-text-muted hover:bg-card-main rounded-lg group/mob-user"
                     >
-                      <User className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-lg bg-card-main border border-border-main overflow-hidden flex items-center justify-center group-hover/mob-user:border-cyber-purple transition-colors">
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        ) : (
+                          <User className="w-4 h-4" />
+                        )}
+                      </div>
                       My Profile
                     </Link>
                     {(profile?.role === 'admin' || profile?.role === 'developer' || profile?.role === 'owner') && (

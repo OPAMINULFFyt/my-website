@@ -31,8 +31,8 @@ const Badge: React.FC<BadgeProps> = ({ role, className, showIcon = true }) => {
     user: {
       label: 'VERIFIED_USER',
       icon: User,
-      color: 'text-white/60 border-white/20 bg-white/5',
-      glow: 'bg-white/10'
+      color: 'text-text-muted border-border-main bg-card-main',
+      glow: 'bg-cyber-purple/5'
     }
   };
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Profile, Product } from '../types';
-import { User, MapPin, Phone, Calendar, Loader2, Package, ExternalLink, Shield, ArrowLeft } from 'lucide-react';
+import { User, MapPin, Phone, Calendar, Loader2, Package, ExternalLink, Shield, ArrowLeft, Facebook, Youtube, Send, MessageCircle } from 'lucide-react';
 import Badge from '../components/Badge';
 import { motion } from 'motion/react';
 import SafeImage from '../components/SafeImage';
@@ -106,8 +106,12 @@ const UserProfile: React.FC = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyber-purple/5 blur-[100px] -z-10" />
         
         <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
-          <div className="w-32 h-32 bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center relative group">
-            <User className="w-16 h-16 text-cyber-purple" />
+          <div className="w-32 h-32 bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center relative group overflow-hidden rounded-xl">
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              <User className="w-16 h-16 text-cyber-purple" />
+            )}
             <div className="absolute inset-0 border border-cyber-purple/50 scale-110 opacity-0 group-hover:opacity-100 transition-all duration-500" />
           </div>
           
@@ -116,6 +120,12 @@ const UserProfile: React.FC = () => {
               <h1 className="text-4xl font-black tracking-tighter uppercase italic">{profile.full_name}</h1>
               <Badge role={profile.role} />
             </div>
+
+            {profile.bio && (
+              <p className="text-sm text-white/60 font-mono italic max-w-2xl">
+                "{profile.bio}"
+              </p>
+            )}
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-xs font-mono text-white/40 uppercase tracking-widest">
               <div className="flex items-center gap-2">
@@ -130,6 +140,29 @@ const UserProfile: React.FC = () => {
                 <Shield className="w-4 h-4 text-cyber-purple" />
                 ID: {profile.id.slice(0, 8)}...
               </div>
+            </div>
+
+            <div className="flex gap-4 pt-2">
+              {profile.facebook_url && (
+                <a href={profile.facebook_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                  <Facebook className="w-4 h-4" />
+                </a>
+              )}
+              {profile.youtube_url && (
+                <a href={profile.youtube_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                  <Youtube className="w-4 h-4" />
+                </a>
+              )}
+              {profile.telegram_url && (
+                <a href={profile.telegram_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                  <Send className="w-4 h-4" />
+                </a>
+              )}
+              {profile.whatsapp_number && (
+                <a href={`https://wa.me/${profile.whatsapp_number}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+              )}
             </div>
           </div>
 

@@ -13,11 +13,17 @@ const Home: React.FC = () => {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = searchParams.get('category') || 'all';
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchParam = searchParams.get('search') || '';
+  const [searchQuery, setSearchQuery] = useState(searchParam);
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
+
+  useEffect(() => {
+    setSearchQuery(searchParam);
+  }, [searchParam]);
   
   const [products, setProducts] = useState<Product[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
+  const [userProgress, setUserProgress] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     operators: '0',
@@ -39,7 +45,7 @@ const Home: React.FC = () => {
       // 1. Fetch all products
       const { data: productsData } = await supabase
         .from('products')
-        .select('*, profiles:publisher_id(full_name, role)');
+        .select('*, profiles:publisher_id(full_name, role, avatar_url)');
       
       if (!productsData) {
         setLoading(false);
@@ -148,6 +154,12 @@ const Home: React.FC = () => {
           .select('*')
           .eq('user_id', user.id);
         if (ordersData) setUserOrders(ordersData);
+
+        const { data: progressData } = await supabase
+          .from('user_progress')
+          .select('*')
+          .eq('user_id', user.id);
+        if (progressData) setUserProgress(progressData);
       }
       setLoading(false);
     };
@@ -204,7 +216,7 @@ const Home: React.FC = () => {
               }}
               className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none"
             >
-              THE <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20">CYBER</span> <br />
+              THE <span className="text-transparent bg-clip-text bg-gradient-to-b from-text-main to-text-main/20">CYBER</span> <br />
               <span className="text-cyber-purple cyber-glow">ARSENAL</span>
             </motion.h1>
 
@@ -230,7 +242,16 @@ const Home: React.FC = () => {
               type="text"
               placeholder="SEARCH_DATABASE..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                if (val.trim()) {
+                  searchParams.set('search', val.trim());
+                } else {
+                  searchParams.delete('search');
+                }
+                setSearchParams(searchParams);
+              }}
               className="cyber-input pl-10 h-11 bg-card-main border-border-main focus:border-cyber-purple/50 transition-all"
             />
           </div>
@@ -292,6 +313,7 @@ const Home: React.FC = () => {
                   key={product.id} 
                   product={product} 
                   order={userOrders.find(o => o.product_id === product.id)}
+                  progress={userProgress.find(p => p.product_id === product.id)}
                 />
               ))}
             </AnimatePresence>
@@ -342,12 +364,13 @@ const Home: React.FC = () => {
                   </div>
                   <Star className="w-5 h-5 text-cyber-purple animate-pulse" />
                 </div>
-                <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+                <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
                   {sections.featured.map((product) => (
-                    <div key={product.id} className="flex-none w-[75vw] sm:w-[280px] md:w-auto md:flex-1 snap-start">
+                    <div key={product.id} className="flex-none w-[75vw] sm:w-[280px] md:w-[320px] snap-start">
                       <ProductCard 
                         product={product} 
                         order={userOrders.find(o => o.product_id === product.id)}
+                        progress={userProgress.find(p => p.product_id === product.id)}
                       />
                     </div>
                   ))}
@@ -369,7 +392,7 @@ const Home: React.FC = () => {
                 </div>
                 <Terminal className="w-5 h-5 text-cyber-purple animate-pulse" />
               </div>
-              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
                 {sections.recommended.map((product) => (
                   <div key={product.id} className="flex-none w-[85vw] md:w-[700px] snap-start">
                     <BannerCard 
@@ -395,12 +418,13 @@ const Home: React.FC = () => {
                 </div>
                 <Zap className="w-5 h-5 text-yellow-500" />
               </div>
-              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
                 {sections.top.map((product) => (
-                  <div key={product.id} className="flex-none w-[70vw] sm:w-[280px] snap-start">
+                  <div key={product.id} className="flex-none w-[70vw] sm:w-[280px] md:w-[300px] snap-start">
                     <ProductCard 
                       product={product} 
                       order={userOrders.find(o => o.product_id === product.id)}
+                      progress={userProgress.find(p => p.product_id === product.id)}
                     />
                   </div>
                 ))}
@@ -421,12 +445,13 @@ const Home: React.FC = () => {
                 </div>
                 <Activity className="w-5 h-5 text-blue-500" />
               </div>
-              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
                 {sections.new.map((product) => (
-                  <div key={product.id} className="flex-none w-[70vw] sm:w-[280px] snap-start">
+                  <div key={product.id} className="flex-none w-[70vw] sm:w-[280px] md:w-[300px] snap-start">
                     <ProductCard 
                       product={product} 
                       order={userOrders.find(o => o.product_id === product.id)}
+                      progress={userProgress.find(p => p.product_id === product.id)}
                     />
                   </div>
                 ))}

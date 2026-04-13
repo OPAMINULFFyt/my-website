@@ -28,16 +28,16 @@ const SupportCenter: React.FC = () => {
             initial={{ opacity: 0, scale: 0.9, y: 20, x: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20, x: 20 }}
-            className="mb-4 w-[350px] md:w-[400px] overflow-hidden rounded-none border border-cyber-purple/30 shadow-[0_0_50px_rgba(0,0,0,0.8)]"
+            className="mb-4 w-[350px] md:w-[400px] overflow-hidden rounded-none border border-cyber-purple/30 shadow-[0_0_50px_rgba(0,0,0,0.3)]"
           >
             {/* Tabs */}
-            <div className="flex bg-cyber-black border-b border-white/10">
+            <div className="flex bg-card-main border-b border-border-main">
               <button 
                 onClick={() => setActiveTab('ai')}
                 className={`flex-1 py-3 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
                   activeTab === 'ai' 
                     ? 'bg-cyber-purple/20 text-cyber-purple border-b-2 border-cyber-purple' 
-                    : 'text-white/40 hover:bg-white/5'
+                    : 'text-text-muted hover:bg-white/5'
                 }`}
               >
                 <Bot className="w-4 h-4" />
@@ -48,7 +48,7 @@ const SupportCenter: React.FC = () => {
                 className={`flex-1 py-3 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
                   activeTab === 'direct' 
                     ? 'bg-cyber-purple/20 text-cyber-purple border-b-2 border-cyber-purple' 
-                    : 'text-white/40 hover:bg-white/5'
+                    : 'text-text-muted hover:bg-white/5'
                 }`}
               >
                 <Headset className="w-4 h-4" />
@@ -57,14 +57,14 @@ const SupportCenter: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div className="bg-cyber-black min-h-[450px]">
+            <div className="bg-card-main min-h-[450px]">
               {activeTab === 'ai' ? (
                 <VirtualAssistant onClose={() => setIsOpen(false)} />
               ) : (
                 <div className="p-6 space-y-6">
                   <div className="text-center space-y-2 mb-8">
-                    <h3 className="text-lg font-bold uppercase tracking-tighter text-white">Human_Operatives</h3>
-                    <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Connect with our elite support team for complex issues</p>
+                    <h3 className="text-lg font-bold uppercase tracking-tighter text-text-main">Human_Operatives</h3>
+                    <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Connect with our elite support team for complex issues</p>
                   </div>
 
                   <div className="grid gap-4">
@@ -124,7 +124,7 @@ const SupportCenter: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`relative group w-14 h-14 rounded-none flex items-center justify-center transition-all duration-500 ${
-          isOpen ? 'bg-white text-cyber-black' : 'bg-cyber-purple text-white shadow-[0_0_30px_rgba(188,19,254,0.4)]'
+          isOpen ? 'bg-text-main text-bg-main' : 'bg-cyber-purple text-white shadow-[0_0_30px_rgba(188,19,254,0.4)]'
         }`}
       >
         <div className="absolute inset-0 border border-white/20 group-hover:border-white/50 transition-colors" />

@@ -6,9 +6,10 @@ import { cn } from '../lib/utils';
 interface VideoPlayerProps {
   url: string;
   title?: string;
+  onEnded?: () => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, onEnded }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -207,6 +208,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
             className="w-full h-full object-contain"
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}
+            onEnded={() => {
+              setIsPlaying(false);
+              if (onEnded) onEnded();
+            }}
             onClick={togglePlay}
           />
 

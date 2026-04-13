@@ -83,7 +83,7 @@ const VirtualAssistant: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="flex flex-col h-[450px] w-full bg-cyber-black/95 border border-cyber-purple/30 shadow-[0_0_30px_rgba(188,19,254,0.2)] overflow-hidden">
+    <div className="flex flex-col h-[450px] w-full bg-card-main border border-cyber-purple/30 shadow-[0_0_30px_rgba(188,19,254,0.2)] overflow-hidden">
       {/* Header */}
       <div className="p-3 bg-cyber-purple/10 border-b border-cyber-purple/30 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -91,14 +91,14 @@ const VirtualAssistant: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-white">AI_ASSISTANT</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-text-main">AI_ASSISTANT</h3>
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               <span className="text-[8px] font-mono text-green-500 uppercase">System_Online</span>
             </div>
           </div>
         </div>
-        <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+        <button onClick={onClose} className="text-text-muted hover:text-text-main transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -118,15 +118,15 @@ const VirtualAssistant: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <div className={`flex gap-2 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
               <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center border ${
                 m.role === 'user' 
-                  ? 'bg-white/5 border-white/10 text-white/60' 
+                  ? 'bg-bg-main border-border-main text-text-muted' 
                   : 'bg-cyber-purple/20 border-cyber-purple/30 text-cyber-purple'
               }`}>
                 {m.role === 'user' ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
               </div>
               <div className={`p-3 text-[11px] leading-relaxed ${
                 m.role === 'user'
-                  ? 'bg-white/5 border border-white/10 text-white/90 rounded-2xl rounded-tr-none'
-                  : 'bg-cyber-purple/5 border border-cyber-purple/20 text-white/90 rounded-2xl rounded-tl-none'
+                  ? 'bg-bg-main border border-border-main text-text-main rounded-2xl rounded-tr-none'
+                  : 'bg-cyber-purple/5 border border-cyber-purple/20 text-text-main rounded-2xl rounded-tl-none'
               }`}>
                 <div className="markdown-body">
                   <ReactMarkdown>{m.content}</ReactMarkdown>
@@ -146,7 +146,7 @@ const VirtualAssistant: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       </div>
 
       {/* Input */}
-      <div className="p-3 bg-white/5 border-t border-white/10">
+      <div className="p-3 bg-card-main border-t border-border-main">
         <form 
           onSubmit={(e) => { e.preventDefault(); handleSend(); }}
           className="relative"
@@ -156,12 +156,12 @@ const VirtualAssistant: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message... (এখানে লিখুন...)"
-            className="w-full bg-cyber-black border border-white/10 px-4 py-2 pr-12 text-xs text-white focus:outline-none focus:border-cyber-purple transition-all placeholder:text-white/20"
+            className="w-full bg-bg-main border border-border-main px-4 py-2 pr-12 text-xs text-text-main focus:outline-none focus:border-cyber-purple transition-all placeholder:text-text-muted/50"
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-cyber-purple hover:text-white disabled:text-white/10 transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-cyber-purple hover:text-text-main disabled:text-text-muted/20 transition-colors"
           >
             <Send className="w-4 h-4" />
           </button>

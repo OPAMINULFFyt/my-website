@@ -97,8 +97,12 @@ const Leaderboard: React.FC = () => {
               </div>
 
               <Link to={`/user/${user.id}`} className="flex-grow flex items-center gap-4 group/link">
-                <div className="w-10 h-10 bg-card-main border border-border-main flex items-center justify-center shrink-0 group-hover/link:border-cyber-purple/50 transition-colors">
-                  <Target className="w-5 h-5 text-text-muted opacity-20 group-hover/link:text-cyber-purple transition-colors" />
+                <div className="w-10 h-10 bg-card-main border border-border-main overflow-hidden flex items-center justify-center shrink-0 group-hover/link:border-cyber-purple/50 transition-colors">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <Target className="w-5 h-5 text-text-muted opacity-20 group-hover/link:text-cyber-purple transition-colors" />
+                  )}
                 </div>
                 <div>
                   <h3 className="font-bold uppercase tracking-tight text-text-main group-hover/link:text-cyber-purple transition-colors">
