@@ -1,0 +1,98 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+interface LocalizationContextType {
+  currency: string;
+  symbol: string;
+  rate: number;
+  loading: boolean;
+  convertPrice: (price: number) => string;
+}
+
+const LocalizationContext = createContext<LocalizationContextType | undefined>(undefined);
+
+export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currency, setCurrency] = useState('BDT');
+  const [symbol, setSymbol] = useState('৳');
+  const [rate, setRate] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const detectLocationAndRates = async () => {
+      let userCurrency = 'BDT';
+      let conversionRate = 1;
+
+      try {
+        // 1. Detect Currency via IP
+        // Try ipapi.co first
+        try {
+          const geoRes = await fetch('https://ipapi.co/json/');
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            if (geoData.currency) userCurrency = geoData.currency;
+          }
+        } catch (e) {
+          console.warn('Primary geo-detection failed, using default BDT');
+        }
+        
+        // 2. Get Exchange Rates (Base: BDT)
+        try {
+          const rateRes = await fetch(`https://open.er-api.com/v6/latest/BDT`);
+          if (rateRes.ok) {
+            const rateData = await rateRes.json();
+            if (rateData.rates && rateData.rates[userCurrency]) {
+              conversionRate = rateData.rates[userCurrency];
+            }
+          }
+        } catch (e) {
+          console.warn('Exchange rate fetch failed, using 1:1');
+        }
+        
+        setCurrency(userCurrency);
+        setRate(conversionRate);
+        
+        // Set Symbol
+        try {
+          const formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: userCurrency,
+          });
+          const parts = formatter.formatToParts(1);
+          const symbolPart = parts.find(p => p.type === 'currency');
+          setSymbol(symbolPart ? symbolPart.value : userCurrency);
+        } catch (e) {
+          setSymbol(userCurrency === 'BDT' ? '৳' : userCurrency);
+        }
+
+      } catch (error) {
+        // Silent fail to avoid disrupting user experience
+        console.warn('Localization system encountered an issue, falling back to defaults.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    detectLocationAndRates();
+  }, []);
+
+  const convertPrice = (price: number) => {
+    const converted = price * rate;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(converted);
+  };
+
+  return (
+    <LocalizationContext.Provider value={{ currency, symbol, rate, loading, convertPrice }}>
+      {children}
+    </LocalizationContext.Provider>
+  );
+};
+
+export const useLocalization = () => {
+  const context = useContext(LocalizationContext);
+  if (!context) throw new Error('useLocalization must be used within LocalizationProvider');
+  return context;
+};
