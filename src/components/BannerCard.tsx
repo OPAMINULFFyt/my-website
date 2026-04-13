@@ -53,6 +53,11 @@ const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
                 </span>
               </div>
             )}
+            {product.original_price && product.original_price > product.price && (
+              <div className="px-3 py-1 bg-cyber-pink text-[10px] font-mono font-bold text-white uppercase tracking-[0.2em] rounded-lg shadow-[0_0_15px_rgba(255,0,255,0.3)]">
+                <span>SALE_PROTOCOL_ACTIVE</span>
+              </div>
+            )}
           </div>
         </Link>
 
@@ -90,7 +95,14 @@ const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
             <div className="flex flex-wrap gap-4 items-center">
               <div className="px-4 py-2 bg-card-main border border-border-main rounded-xl">
                 <span className="block text-[9px] font-mono text-text-muted opacity-50 uppercase">Asset_Value</span>
-                <span className="text-lg font-mono font-bold text-text-main">{convertPrice(product.price)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-mono font-bold text-text-main">{convertPrice(product.price)}</span>
+                  {product.original_price && product.original_price > product.price && (
+                    <span className="text-xs font-mono text-text-muted line-through opacity-40">
+                      {convertPrice(product.original_price)}
+                    </span>
+                  )}
+                </div>
               </div>
               
               <Link 

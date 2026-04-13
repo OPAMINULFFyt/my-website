@@ -6,6 +6,7 @@ import { User, MapPin, Phone, Calendar, Loader2, Package, ExternalLink, Shield, 
 import Badge from '../components/Badge';
 import { motion } from 'motion/react';
 import SafeImage from '../components/SafeImage';
+import { formatExternalLink } from '../lib/utils';
 
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -144,22 +145,22 @@ const UserProfile: React.FC = () => {
 
             <div className="flex gap-4 pt-2">
               {profile.facebook_url && (
-                <a href={profile.facebook_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                <a href={formatExternalLink(profile.facebook_url)} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
                   <Facebook className="w-4 h-4" />
                 </a>
               )}
               {profile.youtube_url && (
-                <a href={profile.youtube_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                <a href={formatExternalLink(profile.youtube_url)} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
                   <Youtube className="w-4 h-4" />
                 </a>
               )}
               {profile.telegram_url && (
-                <a href={profile.telegram_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                <a href={formatExternalLink(profile.telegram_url)} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
                   <Send className="w-4 h-4" />
                 </a>
               )}
               {profile.whatsapp_number && (
-                <a href={`https://wa.me/${profile.whatsapp_number}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
+                <a href={formatExternalLink(`https://wa.me/${profile.whatsapp_number}`)} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-cyber-purple hover:border-cyber-purple transition-all">
                   <MessageCircle className="w-4 h-4" />
                 </a>
               )}

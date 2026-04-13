@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Product, Order } from '../types';
 import { useAuth } from '../App';
 import ProductCard from '../components/ProductCard';
 import BannerCard from '../components/BannerCard';
-import { Shield, Zap, Cpu, BookOpen, FileCode, Search, Filter, ArrowUpDown, Activity, Terminal, Star, Users, Download, CreditCard, Globe, MessageCircle } from 'lucide-react';
+import { Shield, Zap, Cpu, BookOpen, FileCode, Search, Filter, ArrowUpDown, Activity, Terminal, Star, Users, Download, CreditCard, Globe, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnnouncementsMarquee } from '../components/Announcements';
 
@@ -30,6 +30,21 @@ const Home: React.FC = () => {
     assets: '0',
     transactions: '0'
   });
+
+  const featuredRef = useRef<HTMLDivElement>(null);
+  const recommendedRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const latestRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (ref: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
+    if (ref.current) {
+      const scrollAmount = 400;
+      ref.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const [sections, setSections] = useState<{
     featured: Product[];
@@ -362,9 +377,26 @@ const Home: React.FC = () => {
                     <h2 className="text-2xl font-bold uppercase tracking-tighter text-text-main">Featured_Assets</h2>
                     <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Hand-picked premium modules for elite operators</p>
                   </div>
-                  <Star className="w-5 h-5 text-cyber-purple animate-pulse" />
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => scroll(featuredRef, 'left')}
+                      className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                    </button>
+                    <button 
+                      onClick={() => scroll(featuredRef, 'right')}
+                      className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                    >
+                      <ChevronRight className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                    </button>
+                    <Star className="w-5 h-5 text-cyber-purple animate-pulse" />
+                  </div>
                 </div>
-                <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
+                <div 
+                  ref={featuredRef}
+                  className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 cyber-scrollbar-h -mx-4 px-4 md:mx-0 md:px-0 items-stretch"
+                >
                   {sections.featured.map((product) => (
                     <div key={product.id} className="flex-none w-[75vw] sm:w-[280px] md:w-[320px] snap-start">
                       <ProductCard 
@@ -390,9 +422,26 @@ const Home: React.FC = () => {
                   <h2 className="text-2xl font-bold uppercase tracking-tighter text-text-main">Recommended_For_You</h2>
                   <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Personalized system analysis based on your activity</p>
                 </div>
-                <Terminal className="w-5 h-5 text-cyber-purple animate-pulse" />
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => scroll(recommendedRef, 'left')}
+                    className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                  </button>
+                  <button 
+                    onClick={() => scroll(recommendedRef, 'right')}
+                    className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                  >
+                    <ChevronRight className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                  </button>
+                  <Terminal className="w-5 h-5 text-cyber-purple animate-pulse" />
+                </div>
               </div>
-              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
+              <div 
+                ref={recommendedRef}
+                className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 cyber-scrollbar-h -mx-4 px-4 md:mx-0 md:px-0 items-stretch"
+              >
                 {sections.recommended.map((product) => (
                   <div key={product.id} className="flex-none w-[85vw] md:w-[700px] snap-start">
                     <BannerCard 
@@ -416,9 +465,26 @@ const Home: React.FC = () => {
                   <h2 className="text-2xl font-bold uppercase tracking-tighter text-yellow-500">Top_Tier_Assets</h2>
                   <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Most valuable and high-performance modules</p>
                 </div>
-                <Zap className="w-5 h-5 text-yellow-500" />
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => scroll(topRef, 'left')}
+                    className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                  </button>
+                  <button 
+                    onClick={() => scroll(topRef, 'right')}
+                    className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                  >
+                    <ChevronRight className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                  </button>
+                  <Zap className="w-5 h-5 text-yellow-500" />
+                </div>
               </div>
-              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
+              <div 
+                ref={topRef}
+                className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 cyber-scrollbar-h -mx-4 px-4 md:mx-0 md:px-0 items-stretch"
+              >
                 {sections.top.map((product) => (
                   <div key={product.id} className="flex-none w-[70vw] sm:w-[280px] md:w-[300px] snap-start">
                     <ProductCard 
@@ -443,9 +509,26 @@ const Home: React.FC = () => {
                   <h2 className="text-2xl font-bold uppercase tracking-tighter text-blue-500">Latest_Infiltrations</h2>
                   <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Recently decrypted and added to database</p>
                 </div>
-                <Activity className="w-5 h-5 text-blue-500" />
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => scroll(latestRef, 'left')}
+                    className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                  </button>
+                  <button 
+                    onClick={() => scroll(latestRef, 'right')}
+                    className="p-2 bg-white/5 border border-border-main hover:border-cyber-purple transition-all rounded-lg hidden md:block"
+                  >
+                    <ChevronRight className="w-4 h-4 text-text-muted hover:text-cyber-purple" />
+                  </button>
+                  <Activity className="w-5 h-5 text-blue-500" />
+                </div>
               </div>
-              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 items-stretch">
+              <div 
+                ref={latestRef}
+                className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 cyber-scrollbar-h -mx-4 px-4 md:mx-0 md:px-0 items-stretch"
+              >
                 {sections.new.map((product) => (
                   <div key={product.id} className="flex-none w-[70vw] sm:w-[280px] md:w-[300px] snap-start">
                     <ProductCard 

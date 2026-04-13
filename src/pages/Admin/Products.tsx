@@ -17,6 +17,7 @@ const AdminProducts: React.FC = () => {
     title: '',
     description: '',
     price: 0,
+    original_price: 0,
     category: 'course',
     content_url: '',
     tutorial_url: '',
@@ -273,7 +274,7 @@ const AdminProducts: React.FC = () => {
                     <input 
                       type="text" required
                       className="cyber-input"
-                      value={currentProduct.title}
+                      value={currentProduct.title || ''}
                       onChange={(e) => {
                         const newTitle = e.target.value;
                         setCurrentProduct({
@@ -289,7 +290,7 @@ const AdminProducts: React.FC = () => {
                     <input 
                       type="text" required
                       className="cyber-input"
-                      value={currentProduct.slug}
+                      value={currentProduct.slug || ''}
                       onChange={(e) => setCurrentProduct({...currentProduct, slug: slugify(e.target.value)})}
                       placeholder="my-cool-product"
                     />
@@ -298,7 +299,7 @@ const AdminProducts: React.FC = () => {
                     <label className="block text-xs font-mono text-text-muted opacity-50 uppercase mb-1">Category</label>
                     <select 
                       className="cyber-input bg-bg-main"
-                      value={currentProduct.category}
+                      value={currentProduct.category || 'course'}
                       onChange={(e) => setCurrentProduct({...currentProduct, category: e.target.value as Category})}
                     >
                       <option value="course">Course</option>
@@ -311,8 +312,17 @@ const AdminProducts: React.FC = () => {
                     <input 
                       type="number" required
                       className="cyber-input"
-                      value={currentProduct.price}
+                      value={currentProduct.price ?? 0}
                       onChange={(e) => setCurrentProduct({...currentProduct, price: Number(e.target.value)})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono text-text-muted opacity-50 uppercase mb-1">Original Price (Discount)</label>
+                    <input 
+                      type="number"
+                      className="cyber-input"
+                      value={currentProduct.original_price ?? 0}
+                      onChange={(e) => setCurrentProduct({...currentProduct, original_price: Number(e.target.value)})}
                     />
                   </div>
                 </div>
@@ -323,7 +333,7 @@ const AdminProducts: React.FC = () => {
                       type="url"
                       className="cyber-input"
                       placeholder="https://example.com/image.jpg"
-                      value={currentProduct.image_url}
+                      value={currentProduct.image_url || ''}
                       onChange={(e) => setCurrentProduct({...currentProduct, image_url: e.target.value})}
                     />
                     <p className="text-[8px] font-mono text-text-muted opacity-20 mt-1 uppercase">Use direct image links (JPG, PNG, WEBP)</p>
@@ -333,7 +343,7 @@ const AdminProducts: React.FC = () => {
                     <input 
                       type="text"
                       className="cyber-input"
-                      value={currentProduct.content_url}
+                      value={currentProduct.content_url || ''}
                       onChange={(e) => setCurrentProduct({...currentProduct, content_url: e.target.value})}
                     />
                   </div>
@@ -343,7 +353,7 @@ const AdminProducts: React.FC = () => {
                       <input 
                         type="text"
                         className="cyber-input"
-                        value={currentProduct.tutorial_url}
+                        value={currentProduct.tutorial_url || ''}
                         onChange={(e) => setCurrentProduct({...currentProduct, tutorial_url: e.target.value})}
                         placeholder="YouTube/Drive/Direct link"
                       />
@@ -395,7 +405,7 @@ const AdminProducts: React.FC = () => {
                             <input 
                               type="text" required
                               className="cyber-input h-9 text-xs"
-                              value={lesson.title}
+                              value={lesson.title || ''}
                               onChange={(e) => {
                                 const newContent = [...(currentProduct.course_content || [])];
                                 newContent[index].title = e.target.value;
@@ -409,7 +419,7 @@ const AdminProducts: React.FC = () => {
                             <input 
                               type="text" required
                               className="cyber-input h-9 text-xs"
-                              value={lesson.url}
+                              value={lesson.url || ''}
                               onChange={(e) => {
                                 const newContent = [...(currentProduct.course_content || [])];
                                 newContent[index].url = e.target.value;
@@ -423,7 +433,7 @@ const AdminProducts: React.FC = () => {
                             <input 
                               type="text"
                               className="cyber-input h-9 text-xs"
-                              value={lesson.image_url}
+                              value={lesson.image_url || ''}
                               onChange={(e) => {
                                 const newContent = [...(currentProduct.course_content || [])];
                                 newContent[index].image_url = e.target.value;
@@ -444,7 +454,7 @@ const AdminProducts: React.FC = () => {
                 <textarea 
                   rows={3} required
                   className="cyber-input"
-                  value={currentProduct.description}
+                  value={currentProduct.description || ''}
                   onChange={(e) => setCurrentProduct({...currentProduct, description: e.target.value})}
                 />
               </div>
@@ -456,7 +466,7 @@ const AdminProducts: React.FC = () => {
                     <textarea 
                       rows={2}
                       className="cyber-input"
-                      value={currentProduct.requirements}
+                      value={currentProduct.requirements || ''}
                       onChange={(e) => setCurrentProduct({...currentProduct, requirements: e.target.value})}
                     />
                   </div>
@@ -465,7 +475,7 @@ const AdminProducts: React.FC = () => {
                     <textarea 
                       rows={2}
                       className="cyber-input"
-                      value={currentProduct.features?.join(', ')}
+                      value={currentProduct.features?.join(', ') || ''}
                       onChange={(e) => setCurrentProduct({...currentProduct, features: e.target.value.split(',').map(f => f.trim())})}
                     />
                   </div>
@@ -476,7 +486,7 @@ const AdminProducts: React.FC = () => {
                     <input 
                       type="url"
                       className="cyber-input"
-                      value={currentProduct.demo_url}
+                      value={currentProduct.demo_url || ''}
                       onChange={(e) => setCurrentProduct({...currentProduct, demo_url: e.target.value})}
                     />
                   </div>
@@ -488,7 +498,7 @@ const AdminProducts: React.FC = () => {
                         <label className="text-[10px] font-mono text-text-muted opacity-40 uppercase">{key}</label>
                         <input 
                           type="text" className="bg-transparent border-b border-border-main text-[10px] text-right focus:outline-none focus:border-cyber-purple text-text-main"
-                          value={value as string}
+                          value={(value as string) || ''}
                           onChange={(e) => setCurrentProduct({
                             ...currentProduct, 
                             metadata: { ...currentProduct.metadata, [key]: e.target.value }

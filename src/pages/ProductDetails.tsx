@@ -380,7 +380,14 @@ const ProductDetails: React.FC = () => {
           </div>
 
           <div className="text-3xl font-mono font-bold text-cyber-purple flex items-center justify-between">
-            {convertPrice(product.price)}
+            <div className="flex items-center gap-4">
+              <span>{convertPrice(product.price)}</span>
+              {product.original_price && product.original_price > product.price && (
+                <span className="text-xl text-text-muted line-through opacity-40">
+                  {convertPrice(product.original_price)}
+                </span>
+              )}
+            </div>
             {progress !== null && (
               <div className="flex items-center gap-3">
                 <div className="text-right">
@@ -668,7 +675,7 @@ const ProductDetails: React.FC = () => {
                         <input 
                           type="text" 
                           required
-                          value={trxId}
+                          value={trxId || ''}
                           onChange={(e) => setTrxId(e.target.value)}
                           className="cyber-input pl-10 h-14 text-lg tracking-widest font-mono"
                           placeholder="8X9Y10Z..."
@@ -737,7 +744,7 @@ const ProductDetails: React.FC = () => {
               </div>
 
               <textarea
-                value={userComment}
+                value={userComment || ''}
                 onChange={(e) => setUserComment(e.target.value)}
                 placeholder="ENTER_ENCRYPTED_FEEDBACK..."
                 className="cyber-input min-h-[100px] py-3 text-xs"

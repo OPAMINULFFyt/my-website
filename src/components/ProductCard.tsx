@@ -134,6 +134,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order, progress }) =
               FEATURED_ASSET
             </div>
           )}
+          {product.original_price && product.original_price > product.price && (
+            <div className="px-2 py-1 bg-cyber-pink text-[9px] font-mono text-white font-bold border border-cyber-pink/50 uppercase tracking-tighter shadow-[0_0_10px_rgba(255,0,255,0.5)] rounded-sm">
+              SALE_ACTIVE
+            </div>
+          )}
           {product.stock_status && product.stock_status !== 'in_stock' && (
             <div className={`px-2 py-1 text-[9px] font-mono font-bold border uppercase tracking-tighter rounded-sm ${
               product.stock_status === 'out_of_stock' ? 'bg-red-500/80 border-red-400 text-white' : 'bg-blue-500/80 border-blue-400 text-white'
@@ -161,6 +166,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order, progress }) =
           className="absolute bottom-0 left-0 px-3 py-1 bg-cyber-purple text-white text-[10px] font-mono font-bold rounded-r-lg"
         >
           <span className="inline-block">{convertPrice(product.price)}</span>
+          {product.original_price && product.original_price > product.price && (
+            <span className="inline-block ml-2 line-through opacity-50 text-[8px]">
+              {convertPrice(product.original_price)}
+            </span>
+          )}
         </motion.div>
       </Link>
 
@@ -200,7 +210,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order, progress }) =
         <div className="mt-auto pt-2 md:pt-4 border-t border-border-main flex items-center justify-between gap-2">
           <div className="flex flex-col min-w-0">
             <span className="text-[7px] md:text-[9px] font-mono text-text-muted opacity-50 uppercase truncate">Value</span>
-            <span className="text-[10px] md:text-sm font-mono font-bold text-cyber-purple truncate">{convertPrice(product.price)}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] md:text-sm font-mono font-bold text-cyber-purple truncate">{convertPrice(product.price)}</span>
+              {product.original_price && product.original_price > product.price && (
+                <span className="text-[8px] md:text-[10px] font-mono text-text-muted line-through opacity-40 truncate">
+                  {convertPrice(product.original_price)}
+                </span>
+              )}
+            </div>
           </div>
 
           {product.category === 'course' && progressPercentage > 0 && (

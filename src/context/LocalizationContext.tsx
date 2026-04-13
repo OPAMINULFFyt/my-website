@@ -23,16 +23,39 @@ export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       try {
         // 1. Detect Currency via IP
-        // Try ipapi.co first
-        try {
-          const geoRes = await fetch('https://ipapi.co/json/');
-          if (geoRes.ok) {
-            const geoData = await geoRes.json();
-            if (geoData.currency) userCurrency = geoData.currency;
-          }
-        } catch (e) {
-          console.warn('Primary geo-detection failed, using default BDT');
-        }
+        // Try multiple services for robustness
+        const detectCurrency = async () => {
+          // Attempt 1: ipapi.co
+          try {
+            const res = await fetch('https://ipapi.co/json/');
+            if (res.ok) {
+              const data = await res.json();
+              if (data.currency) return data.currency;
+            }
+          } catch (e) { /* ignore */ }
+
+          // Attempt 2: freeipapi.com
+          try {
+            const res = await fetch('https://freeipapi.com/api/json');
+            if (res.ok) {
+              const data = await res.json();
+              if (data.currency && data.currency.code) return data.currency.code;
+            }
+          } catch (e) { /* ignore */ }
+
+          // Fallback: Browser Locale
+          try {
+            const locale = navigator.language || 'en-US';
+            const region = locale.split('-')[1];
+            if (region === 'BD') return 'BDT';
+            if (region === 'US') return 'USD';
+            // We could add more common ones or just return null to use default BDT
+          } catch (e) { /* ignore */ }
+
+          return 'BDT';
+        };
+
+        userCurrency = await detectCurrency();
         
         // 2. Get Exchange Rates (Base: BDT)
         try {

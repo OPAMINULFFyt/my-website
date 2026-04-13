@@ -22,3 +22,11 @@ export function slugify(text: string) {
     .replace(/[^\w-]+/g, '')  // Remove all non-word chars
     .replace(/--+/g, '-');    // Replace multiple - with single -
 }
+
+export function formatExternalLink(url: string) {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:') || url.startsWith('tel:')) {
+    return url;
+  }
+  return `https://${url}`;
+}

@@ -19,6 +19,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
     slug: '',
     description: '',
     price: 0,
+    original_price: 0,
     category: category,
     content_url: '',
     tutorial_url: '',
@@ -96,7 +97,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                 <input 
                   type="text" required
                   className="cyber-input"
-                  value={formData.title}
+                  value={formData.title || ''}
                   onChange={(e) => {
                     const newTitle = e.target.value;
                     setFormData({
@@ -115,7 +116,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                   <input 
                     type="text" required
                     className="cyber-input pl-10"
-                    value={formData.slug}
+                    value={formData.slug || ''}
                     onChange={(e) => setFormData({...formData, slug: slugify(e.target.value)})}
                     placeholder="my-cool-product"
                   />
@@ -129,9 +130,22 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                 <input 
                   type="number" required
                   className="cyber-input"
-                  value={formData.price}
+                  value={formData.price ?? 0}
                   onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-mono text-white/50 uppercase mb-1">Original Price (Discount System)</label>
+                <input 
+                  type="number"
+                  className="cyber-input"
+                  value={formData.original_price ?? 0}
+                  onChange={(e) => setFormData({...formData, original_price: Number(e.target.value)})}
+                  placeholder="Enter original price if on sale..."
+                />
+                <p className="text-[8px] font-mono text-white/20 mt-1 uppercase italic">
+                  * Leave 0 or empty if no discount.
+                </p>
               </div>
             </div>
             <div className="space-y-4">
@@ -141,7 +155,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                   type="url" required
                   className="cyber-input"
                   placeholder="https://example.com/image.jpg"
-                  value={formData.image_url}
+                  value={formData.image_url || ''}
                   onChange={(e) => setFormData({...formData, image_url: e.target.value})}
                 />
               </div>
@@ -153,7 +167,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                   <input 
                     type="text" required
                     className="cyber-input"
-                    value={formData.content_url}
+                    value={formData.content_url || ''}
                     onChange={(e) => setFormData({...formData, content_url: e.target.value})}
                     placeholder="Enter URL..."
                   />
@@ -167,7 +181,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                   <input 
                     type="text"
                     className="cyber-input"
-                    value={formData.tutorial_url}
+                    value={formData.tutorial_url || ''}
                     onChange={(e) => setFormData({...formData, tutorial_url: e.target.value})}
                     placeholder="Enter YouTube/Drive/Direct link..."
                   />
@@ -220,7 +234,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                         <input 
                           type="text" required
                           className="cyber-input h-9 text-xs"
-                          value={lesson.title}
+                          value={lesson.title || ''}
                           onChange={(e) => {
                             const newContent = [...formData.course_content];
                             newContent[index].title = e.target.value;
@@ -234,7 +248,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                         <input 
                           type="text" required
                           className="cyber-input h-9 text-xs"
-                          value={lesson.url}
+                          value={lesson.url || ''}
                           onChange={(e) => {
                             const newContent = [...formData.course_content];
                             newContent[index].url = e.target.value;
@@ -248,7 +262,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                         <input 
                           type="text"
                           className="cyber-input h-9 text-xs"
-                          value={lesson.image_url}
+                          value={lesson.image_url || ''}
                           onChange={(e) => {
                             const newContent = [...formData.course_content];
                             newContent[index].image_url = e.target.value;
@@ -264,7 +278,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                         <input 
                           type="text"
                           className="cyber-input h-9 text-xs"
-                          value={lesson.duration}
+                          value={lesson.duration || ''}
                           onChange={(e) => {
                             const newContent = [...formData.course_content];
                             newContent[index].duration = e.target.value;
@@ -278,7 +292,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                         <input 
                           type="text"
                           className="cyber-input h-9 text-xs"
-                          value={lesson.description}
+                          value={lesson.description || ''}
                           onChange={(e) => {
                             const newContent = [...formData.course_content];
                             newContent[index].description = e.target.value;
@@ -305,7 +319,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
             <textarea 
               rows={3} required
               className="cyber-input"
-              value={formData.description}
+              value={formData.description || ''}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
               placeholder="Provide detailed information about this asset..."
             />
@@ -318,7 +332,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                 <textarea 
                   rows={2}
                   className="cyber-input"
-                  value={formData.requirements}
+                  value={formData.requirements || ''}
                   onChange={(e) => setFormData({...formData, requirements: e.target.value})}
                   placeholder="e.g., PC with 8GB RAM, Internet connection..."
                 />
@@ -328,7 +342,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                 <textarea 
                   rows={2}
                   className="cyber-input"
-                  value={formData.features}
+                  value={formData.features || ''}
                   onChange={(e) => setFormData({...formData, features: e.target.value})}
                   placeholder="e.g., Lifetime Access, Source Code, Support..."
                 />
@@ -340,7 +354,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                 <input 
                   type="url"
                   className="cyber-input"
-                  value={formData.demo_url}
+                  value={formData.demo_url || ''}
                   onChange={(e) => setFormData({...formData, demo_url: e.target.value})}
                   placeholder="https://demo.example.com"
                 />
@@ -356,7 +370,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                       <label className="text-[10px] font-mono text-white/40 uppercase">Duration</label>
                       <input 
                         type="text" className="bg-transparent border-b border-white/10 text-[10px] text-right focus:outline-none focus:border-cyber-purple"
-                        value={formData.metadata.duration}
+                        value={formData.metadata.duration || ''}
                         onChange={(e) => setFormData({...formData, metadata: {...formData.metadata, duration: e.target.value}})}
                         placeholder="e.g. 10h 30m"
                       />
@@ -365,7 +379,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                       <label className="text-[10px] font-mono text-white/40 uppercase">Lessons</label>
                       <input 
                         type="text" className="bg-transparent border-b border-white/10 text-[10px] text-right focus:outline-none focus:border-cyber-purple"
-                        value={formData.metadata.lessons}
+                        value={formData.metadata.lessons || ''}
                         onChange={(e) => setFormData({...formData, metadata: {...formData.metadata, lessons: e.target.value}})}
                         placeholder="e.g. 45"
                       />
@@ -379,7 +393,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                       <label className="text-[10px] font-mono text-white/40 uppercase">Version</label>
                       <input 
                         type="text" className="bg-transparent border-b border-white/10 text-[10px] text-right focus:outline-none focus:border-cyber-purple"
-                        value={formData.metadata.version}
+                        value={formData.metadata.version || ''}
                         onChange={(e) => setFormData({...formData, metadata: {...formData.metadata, version: e.target.value}})}
                       />
                     </div>
@@ -387,7 +401,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                       <label className="text-[10px] font-mono text-white/40 uppercase">File Size</label>
                       <input 
                         type="text" className="bg-transparent border-b border-white/10 text-[10px] text-right focus:outline-none focus:border-cyber-purple"
-                        value={formData.metadata.file_size}
+                        value={formData.metadata.file_size || ''}
                         onChange={(e) => setFormData({...formData, metadata: {...formData.metadata, file_size: e.target.value}})}
                         placeholder="e.g. 250MB"
                       />
@@ -401,7 +415,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                       <label className="text-[10px] font-mono text-white/40 uppercase">Warranty</label>
                       <input 
                         type="text" className="bg-transparent border-b border-white/10 text-[10px] text-right focus:outline-none focus:border-cyber-purple"
-                        value={formData.metadata.warranty}
+                        value={formData.metadata.warranty || ''}
                         onChange={(e) => setFormData({...formData, metadata: {...formData.metadata, warranty: e.target.value}})}
                         placeholder="e.g. 1 Year"
                       />
@@ -410,7 +424,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                       <label className="text-[10px] font-mono text-white/40 uppercase">Weight</label>
                       <input 
                         type="text" className="bg-transparent border-b border-white/10 text-[10px] text-right focus:outline-none focus:border-cyber-purple"
-                        value={formData.metadata.weight}
+                        value={formData.metadata.weight || ''}
                         onChange={(e) => setFormData({...formData, metadata: {...formData.metadata, weight: e.target.value}})}
                         placeholder="e.g. 500g"
                       />

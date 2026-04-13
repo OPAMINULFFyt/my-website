@@ -96,6 +96,20 @@
     scrollbar-width: none;
   }
 
+  .cyber-scrollbar-h::-webkit-scrollbar {
+    height: 4px;
+  }
+  .cyber-scrollbar-h::-webkit-scrollbar-track {
+    @apply bg-white/5 rounded-full;
+  }
+  .cyber-scrollbar-h::-webkit-scrollbar-thumb {
+    @apply bg-cyber-purple/30 rounded-full hover:bg-cyber-purple/60 transition-colors;
+  }
+  .cyber-scrollbar-h {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(188, 19, 254, 0.3) transparent;
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
