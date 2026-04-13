@@ -18,7 +18,22 @@ const Checkout: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [trxId, setTrxId] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [useExp, setUseExp] = useState(false);
+  const [expDiscount, setExpDiscount] = useState(0);
   const [gateways, setGateways] = useState<any[]>([]);
+
+  const EXP_CONVERSION_RATE = 0.1; // 1 EXP = 0.1 BDT
+  const MAX_EXP_DISCOUNT_PERCENT = 0.5; // Max 50% discount
+
+  useEffect(() => {
+    if (useExp && profile?.points && product) {
+      const maxDiscount = product.price * MAX_EXP_DISCOUNT_PERCENT;
+      const possibleDiscount = profile.points * EXP_CONVERSION_RATE;
+      setExpDiscount(Math.min(maxDiscount, possibleDiscount));
+    } else {
+      setExpDiscount(0);
+    }
+  }, [useExp, profile?.points, product]);
   const [paymentSettings, setPaymentSettings] = useState({
     bkash: '01XXXXXXXXX',
     nagad: '01XXXXXXXXX',
@@ -93,11 +108,23 @@ const Checkout: React.FC = () => {
     if (!trxId.trim()) return toast.error('Please enter Transaction ID');
 
     setSubmitting(true);
+    
+    // Deduct points if used
+    if (useExp && expDiscount > 0) {
+      const pointsToDeduct = Math.ceil(expDiscount / EXP_CONVERSION_RATE);
+      await supabase.from('profiles').update({
+        points: Math.max(0, (profile.points || 0) - pointsToDeduct)
+      }).eq('id', user.id);
+    }
+
+    const affiliateId = sessionStorage.getItem('affiliate_id');
+
     const { error } = await supabase.from('orders').insert({
       user_id: user.id,
       product_id: product?.id,
       trx_id: trxId,
-      status: 'pending'
+      status: 'pending',
+      affiliate_id: affiliateId || null
     });
 
     if (error) {
@@ -268,13 +295,40 @@ const Checkout: React.FC = () => {
                 <span className="text-text-muted">Subtotal</span>
                 <span className="text-text-main">{convertPrice(product.price)}</span>
               </div>
+              
+              {profile?.points && profile.points > 0 && (
+                <div className="p-3 bg-cyber-purple/5 border border-cyber-purple/20 rounded-lg mt-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-3 h-3 text-cyber-purple" />
+                      <span className="text-[10px] font-mono text-text-main uppercase">Redeem EXP</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={useExp}
+                      onChange={(e) => setUseExp(e.target.checked)}
+                      className="w-4 h-4 accent-cyber-purple"
+                    />
+                  </div>
+                  <p className="text-[9px] font-mono text-text-muted uppercase leading-tight">
+                    Use your {profile.points} EXP for a discount.
+                  </p>
+                  {useExp && (
+                    <div className="flex justify-between text-[10px] font-mono uppercase text-cyber-purple mt-2 pt-2 border-t border-cyber-purple/10">
+                      <span>EXP Discount</span>
+                      <span>-{convertPrice(expDiscount)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex justify-between text-xs font-mono uppercase">
                 <span className="text-text-muted">Processing Fee</span>
                 <span className="text-green-500">FREE</span>
               </div>
               <div className="flex justify-between text-lg font-bold uppercase tracking-tighter pt-2 border-t border-border-main">
                 <span className="text-text-main">Total_Value</span>
-                <span className="text-cyber-purple">{convertPrice(product.price)}</span>
+                <span className="text-cyber-purple">{convertPrice(product.price - expDiscount)}</span>
               </div>
             </div>
 

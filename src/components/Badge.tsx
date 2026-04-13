@@ -1,9 +1,9 @@
 import React from 'react';
-import { Shield, ShieldCheck, User, Zap, Crown } from 'lucide-react';
+import { Shield, ShieldCheck, User, Zap, Crown, Share2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface BadgeProps {
-  role: 'user' | 'admin' | 'developer' | 'owner';
+  role: 'user' | 'admin' | 'developer' | 'owner' | 'affiliate';
   className?: string;
   showIcon?: boolean;
 }
@@ -27,6 +27,12 @@ const Badge: React.FC<BadgeProps> = ({ role, className, showIcon = true }) => {
       icon: Zap,
       color: 'text-blue-400 border-blue-400 bg-blue-400/10 shadow-[0_0_10px_rgba(96,165,250,0.2)]',
       glow: 'bg-blue-400/20'
+    },
+    affiliate: {
+      label: 'AFFILIATE_PARTNER',
+      icon: Share2,
+      color: 'text-green-400 border-green-400 bg-green-400/10 shadow-[0_0_10px_rgba(74,222,128,0.2)]',
+      glow: 'bg-green-400/20'
     },
     user: {
       label: 'VERIFIED_USER',

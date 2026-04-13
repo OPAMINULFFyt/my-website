@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../App';
 import { supabase } from '../lib/supabase';
 import { Order } from '../types';
-import { User, Phone, MapPin, Save, Package, Clock, CheckCircle, XCircle, TrendingUp, Megaphone, Facebook, Youtube, Send, MessageCircle, Lock, Mail, EyeOff, Eye, FileText, Camera, Loader2 } from 'lucide-react';
+import { User, Phone, MapPin, Save, Package, Clock, CheckCircle, XCircle, TrendingUp, Megaphone, Facebook, Youtube, Send, MessageCircle, Lock, Mail, EyeOff, Eye, FileText, Camera, Loader2, Coins, Share2, Copy, ExternalLink, Wallet, AlertCircle, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice } from '../lib/utils';
 import { useLocalization } from '../context/LocalizationContext';
 import Badge from '../components/Badge';
 import { AnnouncementsList } from '../components/Announcements';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const ProfilePage: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -20,6 +20,15 @@ const ProfilePage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
+  
+  // Withdrawal Modal State
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [withdrawalMethod, setWithdrawalMethod] = useState('bKash');
+  const [withdrawalDetails, setWithdrawalDetails] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [opxRate, setOpxRate] = useState(1);
+
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
@@ -68,6 +77,14 @@ const ProfilePage: React.FC = () => {
         const userRank = allProfiles.findIndex(p => p.id === user.id) + 1;
         setRank(userRank);
       }
+
+      // Fetch OPX Rate
+      const { data: rateData } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'opx_to_cash_rate')
+        .single();
+      if (rateData) setOpxRate(parseFloat(rateData.value));
     };
     fetchOrders();
   }, [user]);
@@ -153,6 +170,53 @@ const ProfilePage: React.FC = () => {
       setNewPassword('');
     }
     setPasswordLoading(false);
+  };
+
+  const handleWithdrawal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !profile) return;
+    
+    const amount = parseInt(withdrawalAmount);
+    if (isNaN(amount) || amount <= 0) return toast.error('Invalid amount');
+    if (amount > (profile.opx_coins || 0)) return toast.error('Insufficient OPX coins');
+    
+    setWithdrawing(true);
+    try {
+      // 1. Create withdrawal request
+      const { error: withdrawalError } = await supabase.from('withdrawals').insert({
+        user_id: user.id,
+        amount,
+        method: withdrawalMethod,
+        details: withdrawalDetails,
+        status: 'pending'
+      });
+      
+      if (withdrawalError) throw withdrawalError;
+      
+      // 2. Deduct coins from profile
+      const { error: profileError } = await supabase.from('profiles').update({
+        opx_coins: (profile.opx_coins || 0) - amount
+      }).eq('id', user.id);
+      
+      if (profileError) throw profileError;
+      
+      toast.success('Withdrawal request submitted!');
+      setShowWithdrawModal(false);
+      setWithdrawalAmount('');
+      setWithdrawalDetails('');
+      await refreshProfile();
+    } catch (err: any) {
+      toast.error('Withdrawal failed: ' + err.message);
+    } finally {
+      setWithdrawing(false);
+    }
+  };
+
+  const copyReferralLink = () => {
+    if (!profile?.referral_code) return;
+    const link = `${window.location.origin}/?ref=${profile.referral_code}`;
+    navigator.clipboard.writeText(link);
+    toast.success('Referral link copied to clipboard!');
   };
 
   const calculateLevel = (points: number) => {
@@ -270,6 +334,65 @@ const ProfilePage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Referral & Wallet */}
+        <div className="cyber-card p-6 flex flex-col md:flex-row lg:flex-col gap-6">
+          <div className="flex-1 space-y-4">
+            <div className="flex items-center gap-3 text-yellow-500">
+              <Coins className="w-6 h-6" />
+              <h3 className="font-bold uppercase tracking-tighter">OPX_WALLET</h3>
+            </div>
+            <div className="p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl space-y-1">
+              <p className="text-[10px] font-mono text-text-muted uppercase mb-1">Available Balance</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black text-text-main tracking-tighter">{profile?.opx_coins || 0}</span>
+                <span className="text-xs font-mono text-yellow-500 uppercase">OPX</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-mono text-text-muted uppercase">
+                <Globe className="w-3 h-3" />
+                <span>Est. Value: <span className="text-yellow-500 font-bold">{convertPrice((profile?.opx_coins || 0) * opxRate)}</span></span>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowWithdrawModal(true)}
+              className="w-full py-3 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 font-bold text-xs uppercase hover:bg-yellow-500 hover:text-white transition-all rounded-lg flex items-center justify-center gap-2"
+            >
+              <Wallet className="w-4 h-4" />
+              Request_Withdrawal
+            </button>
+          </div>
+
+          <div className="flex-1 space-y-4 border-t lg:border-t lg:border-l-0 md:border-l md:border-t-0 border-border-main pt-6 lg:pt-6 md:pt-0 md:pl-6 lg:pl-0">
+            <div className="flex items-center gap-3 text-cyber-purple">
+              <Share2 className="w-6 h-6" />
+              <h3 className="font-bold uppercase tracking-tighter">REFERRAL_PROGRAM</h3>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-mono text-text-muted uppercase mb-2">Your Referral Link</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    readOnly
+                    value={`${window.location.origin}/?ref=${profile?.referral_code || '...'}`}
+                    className="cyber-input h-10 text-[10px] font-mono"
+                  />
+                  <button 
+                    onClick={copyReferralLink}
+                    className="p-2 bg-card-main border border-border-main hover:border-cyber-purple text-text-muted hover:text-cyber-purple transition-all rounded-lg"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-3 bg-cyber-purple/5 border border-cyber-purple/20 rounded-lg">
+                <p className="text-[9px] font-mono text-text-muted uppercase leading-relaxed">
+                  Share this link with others. When they sign up and make their first purchase, you'll earn <span className="text-cyber-purple font-bold">EXP</span> and <span className="text-yellow-500 font-bold">OPX Coins</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Profile Customization Form */}
         <div className="lg:col-span-2 space-y-8">
           <div className="cyber-card">
@@ -527,6 +650,108 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Withdrawal Modal */}
+      <AnimatePresence>
+        {showWithdrawModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowWithdrawModal(false)}
+              className="absolute inset-0 bg-cyber-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="cyber-card w-full max-w-md relative z-10 p-8"
+            >
+              <div className="flex items-center justify-between mb-8 border-b border-yellow-500/30 pb-4">
+                <div className="flex items-center gap-3 text-yellow-500">
+                  <Wallet className="w-6 h-6" />
+                  <h2 className="text-xl font-bold uppercase tracking-tighter">WITHDRAW_OPX</h2>
+                </div>
+                <button onClick={() => setShowWithdrawModal(false)} className="text-text-muted hover:text-white">
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleWithdrawal} className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-mono text-text-muted uppercase mb-2">Amount to Withdraw (OPX)</label>
+                  <div className="relative">
+                    <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-yellow-500/50" />
+                    <input 
+                      type="number" 
+                      required
+                      min="1"
+                      max={profile?.opx_coins || 0}
+                      value={withdrawalAmount}
+                      onChange={(e) => setWithdrawalAmount(e.target.value)}
+                      className="cyber-input pl-10 border-yellow-500/30 focus:border-yellow-500"
+                      placeholder="Enter amount..."
+                    />
+                  </div>
+                  <p className="text-[9px] font-mono text-text-muted mt-2 uppercase flex justify-between">
+                    <span>Balance: <span className="text-yellow-500">{profile?.opx_coins || 0} OPX</span></span>
+                    {withdrawalAmount && !isNaN(parseInt(withdrawalAmount)) && (
+                      <span className="text-green-500">Est. Value: {convertPrice(parseInt(withdrawalAmount) * opxRate)}</span>
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono text-text-muted uppercase mb-2">Payment Method</label>
+                  <select 
+                    value={withdrawalMethod}
+                    onChange={(e) => setWithdrawalMethod(e.target.value)}
+                    className="cyber-input h-12"
+                  >
+                    <option value="bKash">bKash (Personal)</option>
+                    <option value="Nagad">Nagad (Personal)</option>
+                    <option value="Rocket">Rocket</option>
+                    <option value="Bank">Bank Transfer</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono text-text-muted uppercase mb-2">Payment Details</label>
+                  <textarea 
+                    required
+                    rows={3}
+                    value={withdrawalDetails}
+                    onChange={(e) => setWithdrawalDetails(e.target.value)}
+                    className="cyber-input p-4"
+                    placeholder="Enter your account number or bank details..."
+                  />
+                </div>
+
+                <div className="p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-lg flex gap-3 items-start">
+                  <AlertCircle className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                  <p className="text-[9px] font-mono text-yellow-500/80 leading-relaxed uppercase italic">
+                    Note: Withdrawal requests are processed within 24-48 hours. Ensure your payment details are correct.
+                  </p>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={withdrawing}
+                  className="cyber-button w-full h-14 bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500 hover:text-white"
+                >
+                  {withdrawing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      PROCESSING_REQUEST...
+                    </span>
+                  ) : 'CONFIRM_WITHDRAWAL'}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Product, Order } from '../types';
 import { useAuth } from '../App';
 import { formatPrice } from '../lib/utils';
-import { ShoppingCart, ExternalLink, Clock, CheckCircle, XCircle, ArrowLeft, Shield, Zap, Cpu, BookOpen, FileCode, Star, MessageSquare, Send, Loader2, User, Play, Lock } from 'lucide-react';
+import { ShoppingCart, ExternalLink, Clock, CheckCircle, XCircle, ArrowLeft, Shield, Zap, Cpu, BookOpen, FileCode, Star, MessageSquare, Send, Loader2, User, Play, Lock, Share2, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import Badge from '../components/Badge';
@@ -375,11 +375,21 @@ const ProductDetails: React.FC = () => {
                 </span>
               </Link>
               <Badge role={product.profiles?.role || 'admin'} showIcon={false} className="scale-75 origin-left" />
+              {product.required_points && product.required_points > 0 && (
+                <div className={`px-2 py-1 text-[10px] font-mono font-bold border uppercase tracking-widest rounded-lg flex items-center gap-2 ${
+                  (profile?.points || 0) >= product.required_points 
+                    ? 'bg-green-500/10 border-green-500/30 text-green-500' 
+                    : 'bg-red-500/10 border-red-500/30 text-red-500'
+                }`}>
+                  <Zap className="w-3 h-3" />
+                  Required EXP: {product.required_points}
+                </div>
+              )}
             </div>
             <div className="h-1 w-20 bg-cyber-purple" />
           </div>
 
-          <div className="text-3xl font-mono font-bold text-cyber-purple flex items-center justify-between">
+          <div className="text-3xl font-mono font-bold text-cyber-purple">
             <div className="flex items-center gap-4">
               <span>{convertPrice(product.price)}</span>
               {product.original_price && product.original_price > product.price && (
@@ -388,19 +398,11 @@ const ProductDetails: React.FC = () => {
                 </span>
               )}
             </div>
-            {progress !== null && (
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-[10px] font-mono text-text-muted uppercase">Your_Progress</p>
-                  <p className="text-xs font-bold text-cyber-purple">{progress}%</p>
-                </div>
-                <div className="w-24 h-1.5 bg-white/5 border border-border-main rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-cyber-purple shadow-[0_0_10px_rgba(188,19,254,0.5)]"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
+            {profile?.points && profile.points > 0 && (
+              <p className="text-[10px] font-mono text-green-500 uppercase tracking-widest flex items-center gap-1.5 mt-2">
+                <Zap className="w-3 h-3" />
+                Redeem EXP for up to 50% discount at checkout
+              </p>
             )}
           </div>
 
@@ -415,6 +417,28 @@ const ProductDetails: React.FC = () => {
               {product.description}
             </p>
           </motion.div>
+
+          {progress !== null && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="cyber-card bg-card-main border-border-main"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest">Learning_Progress</p>
+                  <p className="text-sm font-bold text-cyber-purple">{progress}% Completed</p>
+                </div>
+                <div className="flex-1 max-w-sm h-2 bg-white/5 border border-border-main rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-cyber-purple shadow-[0_0_10px_rgba(188,19,254,0.5)]"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Advanced Specs & Features */}
           <motion.div 
@@ -579,13 +603,57 @@ const ProductDetails: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <Link 
-                to={`/checkout/${product.id}`}
-                className="cyber-button w-full flex items-center justify-center gap-3 py-4 text-lg"
-              >
-                <ShoppingCart className="w-6 h-6" />
-                INITIALIZE PURCHASE
-              </Link>
+              <div className="space-y-4">
+                {product.required_points && product.required_points > (profile?.points || 0) ? (
+                  <div className="p-6 border border-red-500/30 bg-red-500/5 text-red-500 flex flex-col items-center gap-4 text-center">
+                    <Lock className="w-12 h-12" />
+                    <div>
+                      <p className="font-bold uppercase text-lg">Access Restricted</p>
+                      <p className="text-sm opacity-70 font-mono mt-1">Required EXP: {product.required_points}</p>
+                      <p className="text-xs mt-4 text-text-muted">You need more EXP to unlock this asset. Earn EXP by reviewing other products or completing courses.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <Link 
+                      to={`/checkout/${product.id}`}
+                      className="cyber-button w-full flex items-center justify-center gap-3 py-4 text-lg"
+                    >
+                      <ShoppingCart className="w-6 h-6" />
+                      INITIALIZE PURCHASE
+                    </Link>
+
+                    {(profile?.role === 'affiliate' || profile?.role === 'admin' || profile?.role === 'owner' || profile?.role === 'developer') && (
+                      <div className="p-4 bg-cyber-purple/5 border border-cyber-purple/20 rounded-lg space-y-3">
+                        <div className="flex items-center gap-2 text-cyber-purple">
+                          <Share2 className="w-4 h-4" />
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Partner_Program_Active</span>
+                        </div>
+                        <p className="text-[9px] font-mono text-text-muted uppercase leading-relaxed">
+                          Share this product to earn <span className="text-yellow-500">OPX Coins</span> on every successful sale.
+                        </p>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            readOnly
+                            value={`${window.location.origin}/product/${product.slug || product.id}?aff=${profile.id}`}
+                            className="cyber-input h-10 text-[10px] font-mono"
+                          />
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/product/${product.slug || product.id}?aff=${profile.id}`);
+                              toast.success('Partner link copied!');
+                            }}
+                            className="p-2 bg-card-main border border-border-main hover:border-cyber-purple text-text-muted hover:text-cyber-purple transition-all rounded-lg"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </motion.div>

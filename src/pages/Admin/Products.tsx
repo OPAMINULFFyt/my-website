@@ -325,6 +325,16 @@ const AdminProducts: React.FC = () => {
                       onChange={(e) => setCurrentProduct({...currentProduct, original_price: Number(e.target.value)})}
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-mono text-text-muted opacity-50 uppercase mb-1">Required EXP Points (Lock)</label>
+                    <input 
+                      type="number"
+                      className="cyber-input"
+                      value={currentProduct.required_points ?? 0}
+                      onChange={(e) => setCurrentProduct({...currentProduct, required_points: Number(e.target.value)})}
+                      placeholder="0 = No requirement"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-4">
                   <div>

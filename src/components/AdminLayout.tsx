@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Shield, MessageSquare, Activity, Megaphone, Crown } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Shield, MessageSquare, Activity, Megaphone, Crown, Coins, Zap } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '../App';
@@ -33,9 +33,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { label: 'Dashboard', icon: LayoutDashboard, path: '/admin', roles: ['owner', 'admin', 'developer'] },
     { label: 'Products', icon: Package, path: '/admin/products', roles: ['owner', 'admin', 'developer'] },
     { label: 'Orders', icon: ShoppingCart, path: '/admin/orders', roles: ['owner', 'admin'] },
+    { label: 'Withdrawals', icon: Coins, path: '/admin/withdrawals', roles: ['owner', 'admin'] },
     { label: 'Users', icon: Shield, path: '/admin/users', roles: ['owner', 'admin'] },
     { label: 'Reviews', icon: MessageSquare, path: '/admin/reviews', roles: ['owner', 'admin'] },
     { label: 'Announcements', icon: Megaphone, path: '/admin/announcements', roles: ['owner', 'admin'] },
+    { label: 'Coin Settings', icon: Coins, path: '/admin/coin-settings', roles: ['owner', 'admin'] },
+    { label: 'Reward Config', icon: Zap, path: '/admin/points-settings', roles: ['owner', 'admin'] },
     { label: 'System Logs', icon: Activity, path: '/admin/logs', roles: ['owner', 'admin', 'developer'] },
     { label: 'Settings', icon: Settings, path: '/admin/settings', roles: ['owner'] },
   ];

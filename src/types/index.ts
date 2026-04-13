@@ -12,8 +12,11 @@ export interface Profile {
   youtube_url?: string;
   telegram_url?: string;
   whatsapp_number?: string;
-  role: 'user' | 'admin' | 'developer' | 'owner';
+  role: 'user' | 'admin' | 'developer' | 'owner' | 'affiliate';
   points: number;
+  opx_coins: number;
+  referral_code: string;
+  referred_by?: string;
   is_banned?: boolean;
   updated_at: string;
 }
@@ -59,6 +62,7 @@ export interface Product {
   demo_url?: string;
   publisher_id?: string;
   publisher_name?: string;
+  required_points?: number;
   course_content?: CourseLesson[];
   profiles?: {
     full_name: string;
@@ -75,9 +79,29 @@ export interface Order {
   product_id: string;
   trx_id: string;
   status: OrderStatus;
+  affiliate_id?: string;
   created_at: string;
   profiles?: Profile;
   products?: Product;
+}
+
+export interface Withdrawal {
+  id: string;
+  user_id: string;
+  amount: number;
+  method: string;
+  details: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  profiles?: Profile;
+}
+
+export interface Referral {
+  id: string;
+  referrer_id: string;
+  referred_id: string;
+  status: 'pending' | 'completed';
+  created_at: string;
 }
 
 export interface Settings {

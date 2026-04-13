@@ -21,6 +21,9 @@ import AddFile from './pages/Admin/AddFile';
 import AddHardware from './pages/Admin/AddHardware';
 import AdminLogs from './pages/Admin/Logs';
 import AdminAnnouncements from './pages/Admin/Announcements';
+import AdminWithdrawals from './pages/Admin/Withdrawals';
+import AdminPointsSettings from './pages/Admin/PointsSettings';
+import AdminCoinSettings from './pages/Admin/CoinSettings';
 import ProductDetails from './pages/ProductDetails';
 import Learning from './pages/Learning';
 import Checkout from './pages/Checkout';
@@ -59,7 +62,19 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       .single();
     
     if (!error && data) {
-      setProfile(data);
+      // Ensure user has a referral code
+      if (!data.referral_code) {
+        const newCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+        const { data: updatedProfile } = await supabase
+          .from('profiles')
+          .update({ referral_code: newCode })
+          .eq('id', userId)
+          .select()
+          .single();
+        if (updatedProfile) setProfile(updatedProfile);
+      } else {
+        setProfile(data);
+      }
     } else {
       setProfile(null);
     }
@@ -130,11 +145,31 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 import { LocalizationProvider } from './context/LocalizationContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
+const ReferralTracker: React.FC = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const ref = params.get('ref');
+    const affiliate = params.get('aff');
+    
+    if (ref) {
+      sessionStorage.setItem('referred_by_code', ref);
+    }
+    if (affiliate) {
+      sessionStorage.setItem('affiliate_id', affiliate);
+    }
+  }, [location]);
+
+  return null;
+};
+
 const AppContent: React.FC = () => {
   const { resolvedTheme } = useTheme();
   
   return (
     <div className="min-h-screen bg-cyber-black flex flex-col">
+      <ReferralTracker />
       <SEOHelmet />
       <GlobalBanner />
       <Navbar />
@@ -216,6 +251,21 @@ const AppContent: React.FC = () => {
           <Route path="/admin/announcements" element={
             <AdminRoute>
               <AdminAnnouncements />
+            </AdminRoute>
+          } />
+          <Route path="/admin/withdrawals" element={
+            <AdminRoute>
+              <AdminWithdrawals />
+            </AdminRoute>
+          } />
+          <Route path="/admin/points-settings" element={
+            <AdminRoute>
+              <AdminPointsSettings />
+            </AdminRoute>
+          } />
+          <Route path="/admin/coin-settings" element={
+            <AdminRoute>
+              <AdminCoinSettings />
             </AdminRoute>
           } />
         </Routes>

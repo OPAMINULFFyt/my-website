@@ -11,7 +11,7 @@ interface Profile {
   full_name: string;
   phone: string;
   address: string;
-  role: 'user' | 'admin' | 'developer' | 'owner';
+  role: 'user' | 'admin' | 'developer' | 'owner' | 'affiliate';
   points: number;
   is_banned: boolean;
   avatar_url?: string;
@@ -58,7 +58,7 @@ const AdminUsers: React.FC = () => {
 
   const [confirmingOwnerId, setConfirmingOwnerId] = useState<string | null>(null);
 
-  const updateUserRole = async (userId: string, newRole: 'user' | 'admin' | 'developer' | 'owner') => {
+  const updateUserRole = async (userId: string, newRole: 'user' | 'admin' | 'developer' | 'owner' | 'affiliate') => {
     if (currentUserProfile?.role !== 'owner' && (newRole === 'admin' || newRole === 'owner')) {
       return toast.error('Only SYSTEM_OWNER can assign ADMIN or OWNER roles');
     }
@@ -199,6 +199,18 @@ const AdminUsers: React.FC = () => {
                     )}
                   >
                     User
+                  </button>
+                  <button
+                    disabled={updatingId === profile.id}
+                    onClick={() => updateUserRole(profile.id, 'affiliate')}
+                    className={cn(
+                      "px-3 py-2 text-[10px] font-mono uppercase tracking-widest border transition-all",
+                      profile.role === 'affiliate' 
+                        ? "bg-green-500/20 border-green-500 text-green-500" 
+                        : "border-border-main text-text-muted opacity-30 hover:border-green-500/50 hover:text-green-500"
+                    )}
+                  >
+                    Affiliate
                   </button>
                   <button
                     disabled={updatingId === profile.id}

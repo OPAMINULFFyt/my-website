@@ -43,19 +43,31 @@ export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             }
           } catch (e) { /* ignore */ }
 
+          // Attempt 3: Timezone hint
+          try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (tz.includes('Dhaka')) return 'BDT';
+            if (tz.includes('Calcutta') || tz.includes('Kolkata')) return 'INR';
+          } catch (e) { /* ignore */ }
+
           // Fallback: Browser Locale
           try {
             const locale = navigator.language || 'en-US';
             const region = locale.split('-')[1];
             if (region === 'BD') return 'BDT';
             if (region === 'US') return 'USD';
-            // We could add more common ones or just return null to use default BDT
           } catch (e) { /* ignore */ }
 
           return 'BDT';
         };
 
         userCurrency = await detectCurrency();
+        
+        // Force BDT if timezone is Dhaka even if IP failed
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (tz.includes('Dhaka')) {
+          userCurrency = 'BDT';
+        }
         
         // 2. Get Exchange Rates (Base: BDT)
         try {
@@ -99,7 +111,10 @@ export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const convertPrice = (price: number) => {
     const converted = price * rate;
-    return new Intl.NumberFormat('en-US', {
+    // Use local-friendly formatting
+    const locale = currency === 'BDT' ? 'en-BD' : 'en-US';
+    
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,

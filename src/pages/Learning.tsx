@@ -155,7 +155,13 @@ const Learning: React.FC = () => {
       toast.error('Failed to save progress');
     } else {
       setCompletedLessons(newCompleted);
-      if (!isCompleted) toast.success('Lesson marked as complete!');
+      if (!isCompleted) {
+        toast.success('Lesson marked as complete! +10 EXP');
+        // Award 10 EXP for completing a lesson
+        await supabase.from('profiles').update({
+          points: (profile?.points || 0) + 10
+        }).eq('id', user.id);
+      }
     }
     setSavingProgress(false);
   };

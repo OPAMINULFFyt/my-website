@@ -447,6 +447,7 @@ const Home: React.FC = () => {
                     <BannerCard 
                       product={product} 
                       order={userOrders.find(o => o.product_id === product.id)}
+                      progress={userProgress.find(p => p.product_id === product.id)}
                     />
                   </div>
                 ))}

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Product, Order } from '../types';
 import { useAuth } from '../App';
 import { formatPrice } from '../lib/utils';
-import { ShoppingCart, ExternalLink, Lock, CheckCircle, Clock, XCircle, Eye, Heart } from 'lucide-react';
+import { ShoppingCart, ExternalLink, Lock, CheckCircle, Clock, XCircle, Eye, Heart, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -149,6 +149,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order, progress }) =
           <div className="px-2 py-1 bg-bg-main text-[9px] font-mono text-cyber-purple border border-cyber-purple/30 uppercase tracking-tighter rounded-sm">
             SEC_{product.category.substring(0, 3)}
           </div>
+          {product.required_points && product.required_points > 0 && (
+            <div className={`px-2 py-1 text-[9px] font-mono font-bold border uppercase tracking-tighter rounded-sm flex items-center gap-1 ${
+              (profile?.points || 0) >= product.required_points 
+                ? 'bg-green-500/20 border-green-500/50 text-green-500' 
+                : 'bg-red-500/20 border-red-500/50 text-red-500'
+            }`}>
+              <Zap className="w-2 h-2" />
+              {product.required_points} XP
+            </div>
+          )}
           <button 
             onClick={toggleLike}
             disabled={likeLoading}
@@ -207,6 +217,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order, progress }) =
           {product.description}
         </p>
         
+        {product.category === 'course' && progressPercentage > 0 && (
+          <div className="mb-4 space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-[8px] font-mono text-text-muted uppercase tracking-widest">Learning_Progress</span>
+              <span className="text-[10px] font-mono text-cyber-purple font-bold">{progressPercentage}%</span>
+            </div>
+            <div className="w-full h-1 bg-white/5 border border-border-main rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-cyber-purple shadow-[0_0_8px_rgba(188,19,254,0.5)]" 
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+        )}
+        
         <div className="mt-auto pt-2 md:pt-4 border-t border-border-main flex items-center justify-between gap-2">
           <div className="flex flex-col min-w-0">
             <span className="text-[7px] md:text-[9px] font-mono text-text-muted opacity-50 uppercase truncate">Value</span>
@@ -219,21 +244,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, order, progress }) =
               )}
             </div>
           </div>
-
-          {product.category === 'course' && progressPercentage > 0 && (
-            <div className="flex flex-col items-end min-w-0">
-              <span className="text-[7px] md:text-[9px] font-mono text-text-muted opacity-50 uppercase truncate">Progress</span>
-              <div className="flex items-center gap-2">
-                <div className="w-12 md:w-16 h-1 bg-white/5 border border-border-main rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-cyber-purple shadow-[0_0_8px_rgba(188,19,254,0.5)]" 
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-                <span className="text-[8px] md:text-[10px] font-mono text-cyber-purple font-bold">{progressPercentage}%</span>
-              </div>
-            </div>
-          )}
 
           <Link 
             to={`/product/${product.slug || product.id}`}

@@ -28,10 +28,27 @@ const AdminOrders: React.FC = () => {
     }
   };
 
+  const [rewardSettings, setRewardSettings] = useState({
+    referral_exp: 100,
+    referral_opx: 10,
+    affiliate_opx_percent: 5
+  });
+
   const fetchOrders = async () => {
     setLoading(true);
     setError(null);
     try {
+      // Fetch reward settings
+      const { data: settingsData } = await supabase.from('settings').select('*');
+      if (settingsData) {
+        const settingsMap = settingsData.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {} as any);
+        setRewardSettings({
+          referral_exp: parseInt(settingsMap.referral_exp) || 100,
+          referral_opx: parseInt(settingsMap.referral_opx) || 10,
+          affiliate_opx_percent: parseInt(settingsMap.affiliate_opx_percent) || 5
+        });
+      }
+
       // Try fetching with joins first
       let query = supabase
         .from('orders')
@@ -95,19 +112,72 @@ const AdminOrders: React.FC = () => {
       if (status === 'approved') {
         const pointsToAward = Math.floor(price / 10) || 10; // 10% of price or min 10
         
-        // Get current points first to be safe (or use rpc if available, but let's do simple update)
-        const { data: profile } = await supabase
+        // 1. Award buyer points
+        const { data: buyerProfile } = await supabase
           .from('profiles')
-          .select('points')
+          .select('*')
           .eq('id', userId)
           .single();
         
-        const currentPoints = profile?.points || 0;
-        
-        await supabase
-          .from('profiles')
-          .update({ points: currentPoints + pointsToAward })
-          .eq('id', userId);
+        if (buyerProfile) {
+          await supabase
+            .from('profiles')
+            .update({ points: (buyerProfile.points || 0) + pointsToAward })
+            .eq('id', userId);
+
+          // 2. Handle Referral Rewards
+          if (buyerProfile.referred_by) {
+            // Check if this is the first approved order for this user
+            const { count } = await supabase
+              .from('orders')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_id', userId)
+              .eq('status', 'approved');
+            
+            // If count is 1 (this order), it's the first one
+            if (count === 1) {
+              const { data: referrer } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('referral_code', buyerProfile.referred_by)
+                .single();
+              
+              if (referrer) {
+                await supabase
+                  .from('profiles')
+                  .update({ 
+                    points: (referrer.points || 0) + rewardSettings.referral_exp,
+                    opx_coins: (referrer.opx_coins || 0) + rewardSettings.referral_opx
+                  })
+                  .eq('id', referrer.id);
+                toast.success(`Referrer ${referrer.full_name} awarded ${rewardSettings.referral_exp} XP & ${rewardSettings.referral_opx} OPX!`);
+              }
+            }
+          }
+        }
+
+        // 3. Handle Affiliate Rewards
+        const order = orders.find(o => o.id === orderId);
+        if (order?.affiliate_id) {
+          const { data: affiliate } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', order.affiliate_id)
+            .single();
+          
+          if (affiliate && affiliate.role === 'affiliate') {
+            const affiliateCommission = Math.floor(price * (rewardSettings.affiliate_opx_percent / 100));
+            if (affiliateCommission > 0) {
+              await supabase
+                .from('profiles')
+                .update({ 
+                  opx_coins: (affiliate.opx_coins || 0) + affiliateCommission
+                })
+                .eq('id', affiliate.id);
+              toast.success(`Affiliate ${affiliate.full_name} awarded ${affiliateCommission} OPX!`);
+            }
+          }
+        }
           
         toast.success(`Order APPROVED. User awarded ${pointsToAward} XP!`);
       } else {

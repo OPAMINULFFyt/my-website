@@ -112,6 +112,8 @@ const AuthPage: React.FC = () => {
       } else {
         // Sign up with metadata for the trigger
         console.log('Sending Registration Data:', { fullName, phone, address });
+        const referredByCode = sessionStorage.getItem('referred_by_code');
+        
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -119,7 +121,8 @@ const AuthPage: React.FC = () => {
             data: {
               full_name: fullName,
               phone: phone,
-              address: address
+              address: address,
+              referred_by: referredByCode || null
             }
           }
         });

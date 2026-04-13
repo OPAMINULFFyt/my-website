@@ -11,10 +11,18 @@ import { useLocalization } from '../context/LocalizationContext';
 interface BannerCardProps {
   product: Product;
   order?: Order;
+  progress?: {
+    completed_lessons: string[];
+  };
 }
 
-const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
+const BannerCard: React.FC<BannerCardProps> = ({ product, order, progress }) => {
   const { convertPrice } = useLocalization();
+
+  const progressPercentage = product.category === 'course' && product.course_content?.length && progress
+    ? Math.round((progress.completed_lessons.length / product.course_content.length) * 100)
+    : 0;
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
@@ -56,6 +64,12 @@ const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
             {product.original_price && product.original_price > product.price && (
               <div className="px-3 py-1 bg-cyber-pink text-[10px] font-mono font-bold text-white uppercase tracking-[0.2em] rounded-lg shadow-[0_0_15px_rgba(255,0,255,0.3)]">
                 <span>SALE_PROTOCOL_ACTIVE</span>
+              </div>
+            )}
+            {product.required_points && product.required_points > 0 && (
+              <div className="px-3 py-1 bg-cyber-black/80 text-[10px] font-mono font-bold text-cyber-purple uppercase tracking-[0.2em] rounded-lg border border-cyber-purple/30 flex items-center gap-2">
+                <Zap className="w-3 h-3" />
+                <span>REQ: {product.required_points} XP</span>
               </div>
             )}
           </div>
@@ -109,9 +123,17 @@ const BannerCard: React.FC<BannerCardProps> = ({ product, order }) => {
                 to={`/product/${product.slug || product.id}`}
                 className="cyber-button px-6 py-2.5 flex items-center gap-2 group/btn text-xs"
               >
-                <ShoppingCart className="w-4 h-4" />
+                {order?.status === 'approved' ? (
+                  <Zap className="w-4 h-4" />
+                ) : (
+                  <ShoppingCart className="w-4 h-4" />
+                )}
                 <span className="font-bold uppercase tracking-widest">
-                  {order?.status === 'approved' ? 'ACCESS' : 'INITIALIZE'}
+                  {order?.status === 'approved' 
+                    ? (product.category === 'course' 
+                        ? (progressPercentage > 0 ? 'CONTINUE' : 'START') 
+                        : 'ACCESS') 
+                    : 'INITIALIZE'}
                 </span>
                 <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform" />
               </Link>

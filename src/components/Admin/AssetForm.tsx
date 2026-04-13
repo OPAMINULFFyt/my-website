@@ -27,6 +27,7 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
     requirements: '',
     features: '',
     demo_url: '',
+    required_points: 0,
     course_content: [] as any[],
     metadata: (category === 'course' ? {
       duration: '',
@@ -145,6 +146,19 @@ const AssetForm: React.FC<AssetFormProps> = ({ category, title }) => {
                 />
                 <p className="text-[8px] font-mono text-white/20 mt-1 uppercase italic">
                   * Leave 0 or empty if no discount.
+                </p>
+              </div>
+              <div>
+                <label className="block text-xs font-mono text-white/50 uppercase mb-1">Required EXP Points (Lock)</label>
+                <input 
+                  type="number"
+                  className="cyber-input"
+                  value={formData.required_points ?? 0}
+                  onChange={(e) => setFormData({...formData, required_points: Number(e.target.value)})}
+                  placeholder="0 = No requirement"
+                />
+                <p className="text-[8px] font-mono text-white/20 mt-1 uppercase italic">
+                  * Users must have this many points to purchase.
                 </p>
               </div>
             </div>
